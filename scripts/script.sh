@@ -1,11 +1,14 @@
-### Create namespace secrets
-kubectl create ns secrets-ns
-kubectl -n secrets-ns create secret generic db-credentials \
-  --from-env-file=.env
 
 # Remove application
 helmfile destroy
 
+# check secret
+kubectl get secret legal-backend-secret -n application -o yaml
+kubectl get secret legal-backend-secret -n application -o jsonpath="{.data.ENCRYPTION_KEY}" | base64 -d
+
+helmfile destroy --selector name=setup-secrets
+helmfile apply --selector name=setup-secrets
+kubectl get applications -n argocd --no-headers | grep -v root-app-of-apps | awk '{print $1}' | xargs kubectl delete application -n argocd
 #
 kubectl delete namespace argocd --grace-period=0 --force
 

@@ -112,7 +112,10 @@ externalSecrets:
 
 # RBAC configuration
 rbac:
-  enabled: true
-  serviceAccount:
-    name: external-secrets-sa
-    namespace: application
+  create: true        # tạo ClusterRole/ClusterRoleBinding hoặc Role/RoleBinding
+  clusterRole: true   # nếu muốn cấp quyền cluster-wide (có thể đọc secrets nhiều namespace)
+
+serviceAccount:
+  create: true
+  name: external-secrets-sa
+  annotations: {}
