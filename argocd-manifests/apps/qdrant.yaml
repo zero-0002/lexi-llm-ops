@@ -18,7 +18,7 @@ spec:
           value: "app=legal-qdrant"
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: platform-services
+    namespace: data-service
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [CreateNamespace=true]
