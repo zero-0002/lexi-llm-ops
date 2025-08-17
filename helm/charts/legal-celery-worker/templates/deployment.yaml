@@ -58,6 +58,11 @@ spec:
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
+          envFrom:
+            - secretRef:
+                name: legal-celery-worker-secret
+            - configMapRef:
+                name: {{ include "legal-celery-worker.fullname" . }}-config
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

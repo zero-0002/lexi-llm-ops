@@ -34,6 +34,19 @@ config:
   language: "vi"
   maxChatHistory: "100"
 
+# Environment variables
+env: {}
+
+# Environment variables from ConfigMaps and Secrets
+envFrom:
+  - configMapRef:
+      name: legal-frontend-config
+  - secretRef:
+      name: legal-frontend-secret
+
+# Secrets (will be overridden by External Secrets)
+secrets: {}
+
 # Resource configuration
 resources:
   requests:

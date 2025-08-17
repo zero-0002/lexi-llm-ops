@@ -48,6 +48,11 @@ spec:
             - name: CELERY_LOG_LEVEL
               value: {{ .Values.worker.logLevel | quote }}
             {{- end }}
+          envFrom:
+            - secretRef:
+                name: legal-backend-secret
+            - configMapRef:
+                name: {{ include "legal-backend.fullname" . }}-config
           {{- if eq .Values.component "api" }}
           {{- if .Values.healthCheck.enabled }}
           livenessProbe:

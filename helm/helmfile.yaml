@@ -12,6 +12,15 @@ repositories:
     url: https://grafana.github.io/helm-charts
 
 releases:
+#### External Secrets Setup
+  - name: setup-secrets
+    namespace: secrets-management
+    chart: ./charts/setup-secrets
+    values:
+      - values/setup-secrets.yaml
+    labels:
+      app: setup-secrets
+
 #### Releases database 
   - name: legal-mongodb
     namespace: data-service
