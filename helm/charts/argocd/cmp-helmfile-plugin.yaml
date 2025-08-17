@@ -10,6 +10,12 @@ data:
     metadata:
       name: helmfile
     spec:
+      discover:
+        find:
+          command: [sh, -c]
+          args:
+            - |
+              find . -name 'helmfile.yaml' | head -1
       init:
         command: ["sh", "-c"]
         args:
@@ -27,7 +33,7 @@ data:
               # Add repositories with retry logic
               for i in 1 2 3; do
                 echo "Repository setup attempt $i/3..." >&2
-                if timeout 60 helmfile repos --timeout 60; then
+                if timeout 60 helmfile repos; then
                   echo "Repositories setup successful!" >&2
                   break
                 elif [ "$i" -eq 3 ]; then
@@ -58,7 +64,7 @@ data:
             elif [ -f "helmfile.yaml" ]; then
               if [ -n "$HELM_SELECTOR" ]; then
                 echo "Using Helmfile with selector: $HELM_SELECTOR" >&2
-                timeout 300 helmfile -l "$HELM_SELECTOR" template --include-crds --timeout 300
+                timeout 300 helmfile -l "$HELM_SELECTOR" template --include-crds
               else
                 echo "No HELM_SELECTOR provided, deriving from ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
                 
@@ -74,6 +80,9 @@ data:
                   "prometheus-stack") SELECTOR="app=prometheus-stack" ;;
                   "loki") SELECTOR="app=loki" ;;
                   "promtail") SELECTOR="app=promtail" ;;
+                  # Application mappings
+                  "application-backend") SELECTOR="app=legal-backend" ;;
+                  "application-frontend") SELECTOR="app=legal-frontend" ;;
                   # Legacy mapping for old-style names
                   "mongo") SELECTOR="app=legal-mongodb" ;;
                   "redis") SELECTOR="app=legal-redis" ;;
@@ -82,7 +91,7 @@ data:
                 esac
                 
                 echo "Mapped selector: $SELECTOR" >&2
-                timeout 300 helmfile -l "$SELECTOR" template --include-crds --timeout 300
+                timeout 300 helmfile -l "$SELECTOR" template --include-crds
               fi
             else
               echo "[ERROR] No Chart.yaml or helmfile.yaml found!" >&2
