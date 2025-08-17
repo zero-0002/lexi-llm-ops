@@ -1,0 +1,14 @@
+server:
+  ingress:
+    enabled: true
+    hostname: argocd.34.49.177.9.nip.io
+    tls: true
+
+    gke:
+      backendConfig:
+        name: argocd-backend-config
+        spec:
+          healthCheck:
+            requestPath: /healthz
+            port: 8080
+            type: HTTPS

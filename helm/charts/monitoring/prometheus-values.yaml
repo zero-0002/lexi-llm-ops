@@ -1,0 +1,53 @@
+# monitoring/prometheus-values.yaml
+
+# ==========================================================
+# PHẦN THÊM VÀO ĐỂ SỬA LỖI: Tắt việc cài đặt CRD
+# ==========================================================
+# Khối này sẽ ra lệnh cho Prometheus Operator trong chart
+# không tự mình tạo ra các Custom Resource Definitions.
+# prometheusOperator:
+#   createCrds: false
+# ==========================================================
+
+# -- Cấu hình chung --
+# Các khối này giữ nguyên như cũ
+grafana:
+  enabled: true
+prometheus:
+  enabled: true
+alertmanager:
+  enabled: true
+
+# -- Cấu hình Grafana --
+# Có hai khối grafana, đây có thể là lỗi đánh máy, hãy gộp chúng lại.
+grafana:
+  adminPassword: "YourVeryStrongGrafanaPassword123"
+  persistence:
+    enabled: true
+    type: pvc
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: standard # Bỏ comment nếu bạn muốn dùng StorageClass cụ thể
+
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      # URL trỏ đến service của Loki được tạo bởi chart ở Bước 2
+      # Định dạng: http://<tên-release-loki>.<namespace>.svc.cluster.local:3100
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+      isDefault: false # Đặt là false để Prometheus vẫn là nguồn dữ liệu mặc định
+
+# -- Cấu hình Prometheus --
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: standard
+          # Dung lượng cụ thể sẽ do file môi trường ghi đè
+          resources:
+            requests:
+              storage: 10Gi

@@ -1,0 +1,5 @@
+config:
+  clients:
+    # URL trỏ đến service của Loki được tạo bởi chart `grafana/loki`
+    # Định dạng: http://<tên-release-loki>.<namespace>.svc.cluster.local:3100/loki/api/v1/push
+    - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push

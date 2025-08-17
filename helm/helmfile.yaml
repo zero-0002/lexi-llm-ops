@@ -1,16 +1,26 @@
 repositories:
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
+
   - name: qdrant
     url: https://qdrant.github.io/qdrant-helm
 
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
 releases:
+#### Releases database 
   - name: legal-mongodb
     namespace: data-service
     chart: bitnami/mongodb
     version: 15.6.2
     values:
       - values/mongodb.yaml
+    labels:
+      app: legal-mongodb
 
   - name: legal-redis
     namespace: data-service
@@ -18,6 +28,8 @@ releases:
     version: 18.19.4
     values:
       - values/redis.yaml
+    labels:
+      app: legal-redis
 
   - name: legal-qdrant
     namespace: data-service
@@ -25,39 +37,85 @@ releases:
     version: 0.8.3
     values:
       - values/qdrant-simple.yaml
+    labels:
+      app: legal-qdrant
 
+#### Releases monitoring
+
+  - name: prometheus-stack
+    namespace: monitoring
+    chart: prometheus-community/kube-prometheus-stack
+    version: "58.1.0"
+    values:
+      - ./charts/monitoring/prometheus-values.yaml
+    labels:
+      app: prometheus-stack
+
+  - name: loki
+    namespace: monitoring 
+    chart: grafana/loki
+    version: "6.6.1" # Chỉ định phiên bản để ổn định
+    values:
+      - ./charts/monitoring/loki-values.yaml
+    labels:
+      app: loki
+
+  - name: promtail
+    namespace: monitoring
+    chart: grafana/promtail # <-- Sử dụng chart promtail riêng biệt
+    version: "6.15.5"       # Chỉ định phiên bản
+    values:
+      - ./charts/monitoring/promtail-values.yaml
+    labels:
+      app: promtail # Nhãn riêng cho promtail
+
+
+### Releases application
   - name: legal-backend-api
     namespace: application
     chart: ./charts/legal-backend
     values:
       - values/backend-api.yaml
+    labels:
+      app: legal-backend
 
   - name: legal-celery-worker-rag
     namespace: application
     chart: ./charts/legal-celery-worker
     values:
       - values/celery-worker-rag.yaml
+    labels:
+      app: legal-celery-worker-rag
 
   - name: legal-celery-worker-embed
     namespace: application
     chart: ./charts/legal-celery-worker
     values:
       - values/celery-worker-embed.yaml
+    labels:
+      app: legal-celery-worker-embed
 
   - name: legal-celery-worker-retrieval
     namespace: application
     chart: ./charts/legal-celery-worker
     values:
       - values/celery-worker-retrieval.yaml
+    labels:
+      app: legal-celery-worker-retrieval
+
 
   - name: legal-celery-worker-link
     namespace: application
     chart: ./charts/legal-celery-worker
     values:
       - values/celery-worker-link.yaml
+    labels:
+      app: legal-celery-worker-link
 
   - name: legal-frontend
     namespace: application
     chart: ./charts/legal-frontend
     values:
       - values/frontend.yaml
+    labels:
+      app: legal-frontend

@@ -1,0 +1,25 @@
+# argocd-manifests/apps/promtail.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: promtail
+  namespace: argocd
+  annotations:
+    # Chạy ở Wave 1, sau khi Loki (Wave 0) đã ổn định
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/tinhnguyen0110/LexiOps.git' # <-- URL Repo của bạn
+    targetRevision: main
+    path: 'helm'
+    plugin:
+      name: helmfile
+      env:
+        - name: HELM_SELECTOR
+          value: "app=promtail"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

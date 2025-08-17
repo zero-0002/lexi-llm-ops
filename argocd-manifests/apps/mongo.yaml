@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: legal-mongodb
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/tinhnguyen0110/LexiOps'
+    targetRevision: main
+    path: 'helm'
+    plugin:
+      name: helmfile
+      env:
+        - name: HELM_SELECTOR
+          value: "app=legal-mongodb"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: platform-services
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true]

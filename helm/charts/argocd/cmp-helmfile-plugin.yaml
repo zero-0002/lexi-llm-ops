@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmp-helmfile-plugin
+  namespace: argocd
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      # Tên duy nhất của plugin
+      name: helmfile
+    spec:
+      init:
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "===== [INIT] Start Debugging =====" >&2
+            echo "App Name: $ARGOCD_APP_NAME" >&2
+            echo "Listing files (ls -la):" >&2
+            echo "Searching for helmfile.yaml:" >&2
+            find . -name "helmfile.yaml" >&2
+            echo "Searching for Chart.yaml:" >&2
+            find . -name "Chart.yaml" >&2
+            echo "===== [INIT] End Debugging =====" >&2
+            if [ -f "helmfile.yaml" ]; then
+              helmfile repos
+            fi
+      generate:
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "===== [GENERATE] Start Processing =====" >&2
+            echo "ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
+            echo "HELM_SELECTOR: $HELM_SELECTOR" >&2
+            
+            if [ -f "Chart.yaml" ]; then
+              echo "Using Helm template for Chart.yaml" >&2
+              helm template .
+            elif [ -f "helmfile.yaml" ]; then
+              if [ -n "$HELM_SELECTOR" ]; then
+                echo "Using Helmfile with selector: $HELM_SELECTOR" >&2
+                helmfile -l "$HELM_SELECTOR" template --include-crds
+              else
+                echo "No HELM_SELECTOR provided, using ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
+                helmfile -l app=$ARGOCD_APP_NAME template --include-crds
+              fi
+            else
+              echo "[ERROR] No Chart.yaml or helmfile.yaml found!" >&2
+              exit 1
+            fi
+            echo "===== [GENERATE] End Processing =====" >&2

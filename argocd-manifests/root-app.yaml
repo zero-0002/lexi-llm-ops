@@ -1,0 +1,24 @@
+# argocd-manifests/root-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/tinhnguyen0110/LexiOps' 
+    targetRevision: main
+    path: argocd-manifests/apps
+    directory:
+      # Tùy chọn này cho phép đọc cả các thư mục con nếu có
+      recurse: true 
+  # ==========================================================
+  
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,18 @@
+environments:
+  development:
+    values:
+      - ../../environments/development.yaml
+
+repositories:
+  - name: argocd
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: argocd
+    namespace: argocd
+    chart: argocd/argo-cd
+    version: "7.3.6"
+    values:
+      - ../../deployments/argocd/argocd-values.yaml
+    labels:
+      app: argocd
