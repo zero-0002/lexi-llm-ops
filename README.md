@@ -14,6 +14,10 @@ Legal Retrieval System là một hệ thống tra cứu pháp luật hiện đ�
 - **Workflow**: Celery workers cho xử lý bất đồng bộ
 - **Database**: MongoDB cho data persistence, Redis cho caching
 
+<!-- ```markdown
+![System Architecture](./docs/LEXIOPS_System.svg)
+``` -->
+<img src="docs/LEXIOPS_System.svg">
 ## 🚀 Quick Start
 
 ### Prerequisites
