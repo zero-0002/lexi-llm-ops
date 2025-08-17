@@ -11,6 +11,8 @@ ENV/
 .env.secrets
 .env.local
 
+ns.json
+
 data/
 reports/
 tests/
