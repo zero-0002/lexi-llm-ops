@@ -66,10 +66,20 @@ healthCheck:
   initialDelaySeconds: 10
   periodSeconds: 10
 
-# Security context
+# Security context - container level
 securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+# Security context - pod level
+podSecurityContext:
   runAsNonRoot: true
   runAsUser: 101
+  runAsGroup: 101
   fsGroup: 101
 
 # Node selector and tolerations

@@ -68,16 +68,20 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
 
-# Security context
+# Security context - container level
 securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
   runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
 
-# Pod security context
+# Security context - pod level
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
+  runAsGroup: 1000
   fsGroup: 1000
 
 # Node selector and tolerations
