@@ -135,49 +135,9 @@ print_success "Helmfile plugin configured and ArgoCD restarted"
 print_step "🚀 Step 4: Deploying applications..."
 kubectl apply -f ../argocd-manifests/root-app.yaml
 
-# Step 4: Quick status check with enhanced debugging
-print_step "📊 Step 5: Comprehensive deployment status check..."
-
-print_step "⏳ Waiting 30 seconds for initial sync..."
+# Step 4: Quick status check
+print_step "📊 Step 5: Checking deployment status..."
 sleep 30
-
-echo ""
-print_step "🔍 DEBUGGING - ArgoCD Applications Status:"
-kubectl get applications -n argocd -o wide
-
-echo ""
-print_step "🔍 DEBUGGING - Check for any failed applications:"
-FAILED_APPS=$(kubectl get applications -n argocd -o jsonpath='{range .items[?(@.status.sync.status=="Unknown")]}{.metadata.name}{"\n"}{end}')
-if [ -n "$FAILED_APPS" ]; then
-    print_warning "Applications with Unknown sync status:"
-    echo "$FAILED_APPS"
-    
-    for app in $FAILED_APPS; do
-        echo ""
-        print_step "🔍 Details for application: $app"
-        kubectl describe application $app -n argocd | grep -A 10 -B 5 "Message:" | tail -15
-    done
-else
-    print_success "No applications with Unknown status found"
-fi
-
-echo ""
-print_step "🔍 DEBUGGING - Resource Status Check:"
-echo "Legal application pods:"
-kubectl get pods -A | grep legal- || echo "No legal- pods found yet"
-
-echo ""
-echo "All pods by namespace:"
-echo "├── ArgoCD namespace:"
-kubectl get pods -n argocd --no-headers | wc -l | xargs echo "   Pods count:"
-echo "├── Application namespace:"
-kubectl get pods -n application --no-headers 2>/dev/null | wc -l | xargs echo "   Pods count:" || echo "   Namespace not found"
-echo "├── Data-service namespace:"  
-kubectl get pods -n data-service --no-headers 2>/dev/null | wc -l | xargs echo "   Pods count:" || echo "   Namespace not found"
-echo "├── Platform-services namespace:"
-kubectl get pods -n platform-services --no-headers 2>/dev/null | wc -l | xargs echo "   Pods count:" || echo "   Namespace not found"
-echo "└── Monitoring namespace:"
-kubectl get pods -n monitoring --no-headers 2>/dev/null | wc -l | xargs echo "   Pods count:" || echo "   Namespace not found"
 
 echo ""
 print_success "Deployment initiated! 🎉"
@@ -194,20 +154,6 @@ echo "🔑 Get admin password:"
 echo "   kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d && echo"
 
 echo ""
-print_step "🔧 Manual Debug Commands:"
-echo "   # Check application details:"
-echo "   kubectl describe application <app-name> -n argocd"
-echo ""
-echo "   # Force sync applications:"
-echo "   kubectl patch application <app-name> -n argocd -p '{\"operation\":{\"sync\":{}}}' --type=merge"
-echo ""
-echo "   # Check ArgoCD repo-server logs:"
-echo "   kubectl logs -n argocd deployment/argocd-repo-server -c cmp-helmfile -f"
-echo ""
-echo "   # Check all pods:"
-echo "   kubectl get pods -A | grep legal-"
-
-echo ""
 print_step "🎯 Next Steps:"
 echo "   1. Access ArgoCD UI to monitor sync progress"
 echo "   2. Wait for all applications to sync (may take 5-10 minutes)"
@@ -217,33 +163,5 @@ print_step "🎯 Deployment Architecture:"
 echo "   ⚡ ArgoCD: Bootstrap deployment (outside GitOps)"
 echo "   📦 Applications: Managed by ArgoCD via Helmfile"
 echo "   🔄 GitOps: All app changes via Git commits"
-echo ""
-
-# Check if only root app exists
-APP_COUNT=$(kubectl get applications -n argocd --no-headers 2>/dev/null | wc -l || echo "0")
-if [ "$APP_COUNT" -le 1 ]; then
-    print_warning "⚠️ Only root app found or no apps detected. Child applications may not be syncing properly."
-    echo ""
-    print_step "🔧 Quick fixes to try:"
-    echo "   1. kubectl describe application root-app-of-apps -n argocd"
-    echo "   2. kubectl patch application root-app-of-apps -n argocd -p '{\"operation\":{\"sync\":{}}}' --type=merge"
-    echo "   3. kubectl logs -n argocd deployment/argocd-application-controller -f"
-elif [ "$APP_COUNT" -gt 1 ]; then
-    # Count how many are synced
-    SYNCED_COUNT=$(kubectl get applications -n argocd --no-headers 2>/dev/null | grep Synced | wc -l || echo "0")
-    UNKNOWN_COUNT=$(kubectl get applications -n argocd --no-headers 2>/dev/null | grep Unknown | wc -l || echo "0")
-    OUTOFSINC_COUNT=$(kubectl get applications -n argocd --no-headers 2>/dev/null | grep OutOfSync | wc -l || echo "0")
-    
-    print_success "✅ Found $APP_COUNT applications:"
-    echo "   ├── Synced: $SYNCED_COUNT"
-    echo "   ├── Unknown: $UNKNOWN_COUNT"  
-    echo "   └── OutOfSync: $OUTOFSINC_COUNT"
-    
-    if [ "$UNKNOWN_COUNT" -gt 0 ] || [ "$OUTOFSINC_COUNT" -gt 0 ]; then
-        print_warning "Some applications need attention. Check ArgoCD UI or run debug commands above."
-    else
-        print_success "All applications healthy! 🚀"
-    fi
-fi
 echo ""
 print_success "Development environment deployment started! 🚀"

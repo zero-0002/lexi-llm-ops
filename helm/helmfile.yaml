@@ -14,7 +14,7 @@ repositories:
 releases:
 #### External Secrets Setup
   - name: setup-secrets
-    namespace: secrets-management
+    namespace: secrets-store
     chart: ./charts/setup-secrets
     values:
       - values/setup-secrets.yaml

@@ -28,16 +28,16 @@ SECRET_KEY=legal-app-secret-key-development
 JWT_SECRET=legal-jwt-super-secret-key-development
 ENCRYPTION_KEY=legal-32-char-encryption-dev-key
 EOF
-  echo "✅ Sample .env.secrets file created. Please update with your values."
+  echo "✅ Sample .env file created. Please update with your values."
   echo "⚠️  Make sure to add .env.secrets to .gitignore!"
 fi
 
-# Load .env.secrets file
+# Load .env file
 set -a
-source ../.env.secrets
+source ../.env
 set +a
 
-echo "📦 Creating secrets from .env.secrets..."
+echo "📦 Creating secrets from .env  ..."
 
 # MongoDB credentials
 kubectl create secret generic mongodb-credentials \

@@ -6,6 +6,19 @@ kubectl -n secrets-ns create secret generic db-credentials \
 # Remove application
 helmfile destroy
 
+#
+kubectl delete namespace argocd --grace-period=0 --force
+
+kubectl get namespace argocd -o json > ns.json
+"spec": {
+  "finalizers": [
+    "kubernetes"
+  ]
+}
+kubectl proxy
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @ns.json \
+http://127.0.0.1:8001/api/v1/namespaces/argocd/finalize
+
 # remove application with helm
 for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
   helm list -n $ns -q | xargs -r -n1 helm uninstall -n $ns
