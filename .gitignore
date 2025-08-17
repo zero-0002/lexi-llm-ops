@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+
+data/
+reports/
+tests/
+deployment/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!terraform/terraform.tfvars.example
+
+# Test results and temporary files
+tests/results/*.csv
+tests/results/*.json
+tests/results/*.log
+*.log
+celery_*.log
+*_report_*.json
+*_test_*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Docker
+.dockerignore
+
+# Cache and temporary
+.terraform-cache/
+temp/
+*.tmp
+*.temp
+kind-config.yaml
+
+# Database
+mongo_data/
+qdrant_storage/
+
+# Backup files
+*.bak
+*~

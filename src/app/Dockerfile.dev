@@ -1,0 +1,35 @@
+# Development Dockerfile - Based on production with modifications
+FROM python:3.11-slim
+
+# Set environment variables for development
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Install system dependencies including curl for health checks
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set work directory
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Make wait-for-services.py executable
+RUN chmod +x wait-for-services.py
+
+# Expose port
+EXPOSE 8000
+
+# Default command (can be overridden by docker-compose)
+CMD ["python", "main.py"]

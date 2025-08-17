@@ -1,0 +1,29 @@
+# Link Extract Worker Configuration
+# =================================
+
+workerType: link
+replicaCount: 1
+
+image:
+  repository: legal-retrieval/backend
+  tag: "latest"
+  pullPolicy: Never
+
+worker:
+  logLevel: "info"
+  pool: "threads"
+  concurrency: 2
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+env:
+  APP_NAME: "Legal Link Extract Worker"
+  WORKER_TYPE: "link"
+  CELERY_QUEUES: "link_extract_queue"
+  SERPER_API_KEY: "91d19679c0dac6b0447f7f49b8c0d1b56c9e1e01"

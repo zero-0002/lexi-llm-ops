@@ -1,0 +1,49 @@
+# Test Runner Dockerfile
+# =====================
+# Container for running comprehensive API tests
+
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    jq \
+    netcat-traditional \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.test.txt .
+RUN pip install --no-cache-dir -r requirements.test.txt
+
+# Create directories
+RUN mkdir -p /app/tests /app/results /app/logs /app/reports
+
+# Copy test configuration
+COPY pytest.ini .
+COPY conftest.py .
+
+# Copy test scripts
+COPY . /app/tests/
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTEST_CURRENT_TEST=""
+ENV TEST_RESULTS_DIR=/app/results
+ENV TEST_LOGS_DIR=/app/logs
+
+# Create non-root user for security
+RUN groupadd -r testuser && useradd -r -g testuser testuser
+RUN chown -R testuser:testuser /app
+USER testuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://backend-api-test:8000/health')" || exit 1
+
+# Default command
+CMD ["python", "-m", "pytest", "/app/tests", "-v", "--tb=short", "--color=yes"]

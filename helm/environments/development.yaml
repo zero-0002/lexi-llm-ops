@@ -1,0 +1,78 @@
+# Development environment configuration for Legal Retrieval System
+
+# Global settings
+version: "dev-latest"
+storageClass: "default"
+
+# Development-specific settings
+debug: true
+logLevel: "DEBUG"
+
+# Resource constraints for development
+resourceLimits:
+  cpu: "2000m"
+  memory: "4Gi"
+
+# Database settings
+mongodb:
+  persistence:
+    size: "5Gi"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+redis:
+  persistence:
+    size: "2Gi"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+
+qdrant:
+  persistence:
+    size: "10Gi"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Application settings
+backend:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+celery:
+  replicaCount: 1
+  concurrency: 2
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+frontend:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Development features
+features:
+  monitoring: false
+  autoscaling: false
+  ingress: true
+  ssl: false

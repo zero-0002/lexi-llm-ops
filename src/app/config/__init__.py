@@ -1,0 +1,3 @@
+"""
+Config package initialization
+"""

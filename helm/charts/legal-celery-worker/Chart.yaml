@@ -1,0 +1,37 @@
+apiVersion: v2
+name: legal-celery-worker
+description: Legal Retrieval System Celery Worker
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - legal
+  - celery
+  - worker
+  - rag
+  - ai
+maintainers:
+  - name: Legal Team
+    email: dev@legal-retrieval.com
+
+# Common configuration for all workers
+commonConfig:
+  # Common environment variables
+  commonEnv:
+    DOCKER_ENV: "true"
+    DEBUG: "true"
+    LOG_LEVEL: "INFO"
+    
+    # Database connections
+    MONGO_URL: "mongodb://admin:password123@legal-mongodb:27017/legaldb?authSource=admin"
+    REDIS_URL: "redis://legal-redis:6379/0"
+    REDIS_URL_WS: "redis://legal-redis:6379/1"
+    REDIS_URL_RETRIEVAL: "redis://legal-redis:6379/2"
+    QDRANT_URL: "http://legal-qdrant:6333"
+    
+    # Celery base configuration
+    CELERY_BROKER_URL: "redis://legal-redis:6379/3"
+    CELERY_RESULT_BACKEND: "redis://legal-redis:6379/4"
+    CELERY_CONCURRENCY: "2"
+    CELERY_LOGLEVEL: "info"
+    CELERY_POOL: "eventlet"

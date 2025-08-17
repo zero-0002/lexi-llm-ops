@@ -1,0 +1,63 @@
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+  - name: qdrant
+    url: https://qdrant.github.io/qdrant-helm
+
+releases:
+  - name: legal-mongodb
+    namespace: data-service
+    chart: bitnami/mongodb
+    version: 15.6.2
+    values:
+      - values/mongodb.yaml
+
+  - name: legal-redis
+    namespace: data-service
+    chart: bitnami/redis
+    version: 18.19.4
+    values:
+      - values/redis.yaml
+
+  - name: legal-qdrant
+    namespace: data-service
+    chart: qdrant/qdrant
+    version: 0.8.3
+    values:
+      - values/qdrant-simple.yaml
+
+  - name: legal-backend-api
+    namespace: application
+    chart: ./charts/legal-backend
+    values:
+      - values/backend-api.yaml
+
+  - name: legal-celery-worker-rag
+    namespace: application
+    chart: ./charts/legal-celery-worker
+    values:
+      - values/celery-worker-rag.yaml
+
+  - name: legal-celery-worker-embed
+    namespace: application
+    chart: ./charts/legal-celery-worker
+    values:
+      - values/celery-worker-embed.yaml
+
+  - name: legal-celery-worker-retrieval
+    namespace: application
+    chart: ./charts/legal-celery-worker
+    values:
+      - values/celery-worker-retrieval.yaml
+
+  - name: legal-celery-worker-link
+    namespace: application
+    chart: ./charts/legal-celery-worker
+    values:
+      - values/celery-worker-link.yaml
+
+  - name: legal-frontend
+    namespace: application
+    chart: ./charts/legal-frontend
+    values:
+      - values/frontend.yaml

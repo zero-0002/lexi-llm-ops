@@ -1,0 +1,73 @@
+# MongoDB - Simplified Configuration (Production-like)
+# ==================================================
+
+auth:
+  enabled: true
+  rootUser: "admin"
+  rootPassword: "password123"
+
+architecture: standalone
+
+# Persistence
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "standard"
+  accessModes:
+    - ReadWriteOnce
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 27017
+  portName: mongodb
+
+# Resource limits
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Metrics and monitoring
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+
+# Security context
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
+
+# MongoDB configuration
+configuration: |
+  # Custom MongoDB configuration
+  # storage:
+  #   dbPath: /opt/bitnami/mongodb/data/db
+  # net:
+  #   port: 27017
+  #   bindIpAll: true
+
+# Initialize database
+initdbScripts:
+  setup.js: |
+    // Initialize legal database
+    db = db.getSiblingDB('legaldb');
+    db.createCollection('conversations');
+    db.createCollection('documents');
+    db.conversations.createIndex({ "conversation_id": 1 }, { unique: true });
+    db.conversations.createIndex({ "created_at": 1 });
+    db.documents.createIndex({ "document_id": 1 }, { unique: true });
+    print('Legal database initialized successfully');
+
+# Replica set (disabled for development)
+replicaSet:
+  enabled: false
+
+# Arbiter (disabled)
+arbiter:
+  enabled: false

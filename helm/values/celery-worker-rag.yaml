@@ -1,0 +1,28 @@
+# RAG Worker Configuration
+# ========================
+
+workerType: rag
+replicaCount: 1
+
+image:
+  repository: legal-retrieval/backend
+  tag: "latest"
+  pullPolicy: Never
+
+worker:
+  logLevel: "info"
+  pool: "threads"
+  concurrency: 2
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+env:
+  APP_NAME: "Legal RAG Worker"
+  WORKER_TYPE: "rag"
+  CELERY_QUEUES: "rag_queue"

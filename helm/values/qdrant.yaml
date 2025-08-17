@@ -1,0 +1,138 @@
+# Qdrant - Simplified Configuration (Production-like)
+# ==================================================
+
+image:
+  repository: qdrant/qdrant
+  tag: "v1.15.0"
+  pullPolicy: Never
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 6333
+      targetPort: 6333
+
+replicaCount: 1
+      targetPort: 6334
+      protocol: TCP
+      checksEnabled: false
+    - name: p2p
+      port: 6335
+      targetPort: 6335
+      protocol: TCP
+      checksEnabled: false
+  annotations: {}
+
+# Persistence configuration
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: "standard"
+  accessModes:
+    - ReadWriteOnce
+
+# Resource limits
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1000m"
+
+# Qdrant configuration
+config:
+  # Cluster configuration (disabled for development)
+  cluster:
+    enabled: false
+  
+  # Storage configuration
+  storage:
+    # Store payload on disk to save memory
+    on_disk_payload: true
+    # Write-ahead log configuration
+    wal:
+      wal_capacity_mb: 32
+      wal_segments_ahead: 2
+    # Performance configuration
+    performance:
+      max_search_threads: 2
+    # Optimizer configuration
+    optimizer:
+      # The minimal fraction of deleted vectors in a segment, required to perform segment optimization
+      deleted_threshold: 0.2
+      # The minimal number of vectors in a segment, required to perform segment optimization
+      vacuum_min_vector_number: 1000
+      # Target amount of segments optimizer will try to keep
+      default_segment_number: 2
+  
+  # Service configuration
+  service:
+    # HTTP configuration
+    http_port: 6333
+    # gRPC configuration  
+    grpc_port: 6334
+    # Enable CORS for development
+    enable_cors: true
+    # Max request size
+    max_request_size_mb: 32
+  
+  # Logging configuration
+  log_level: INFO
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod security context  
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Init containers
+initContainers:
+  enabled: false
+
+# Health checks
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Replica count (single instance for development)
+replicaCount: 1
+
+# Volume mounts for custom configuration
+extraVolumeMounts: []
+extraVolumes: []

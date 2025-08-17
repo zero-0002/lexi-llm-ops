@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "legal-backend.fullname" . }}-config
+  labels:
+    {{- include "legal-backend.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  # Logging configuration
+  LOG_LEVEL: {{ .Values.logging.level | quote }}
+  LOG_FORMAT: {{ .Values.logging.format | quote }}
+  
+  # Redis configuration
+  REDIS_HOST: {{ .Values.redis.host | quote }}
+  REDIS_PORT: {{ .Values.redis.port | quote }}
+  
+  # MongoDB configuration
+  MONGO_HOST: {{ .Values.mongodb.host | quote }}
+  MONGO_PORT: {{ .Values.mongodb.port | quote }}
+  MONGO_DB: {{ .Values.mongodb.database | quote }}
+  
+  # Qdrant configuration
+  QDRANT_HOST: {{ .Values.qdrant.host | quote }}
+  QDRANT_PORT: {{ .Values.qdrant.port | quote }}
+  
+  # Model configuration
+  EMBEDDING_MODEL: {{ .Values.model.embedding | quote }}
+  LLM_MODEL: {{ .Values.model.llm | quote }}
+  
+  # Celery configuration
+  CELERY_BROKER_URL: {{ printf "redis://%s:%s/0" .Values.redis.host .Values.redis.port | quote }}
+  CELERY_RESULT_BACKEND: {{ printf "redis://%s:%s/0" .Values.redis.host .Values.redis.port | quote }}
+  
+  # Performance configuration
+  MAX_CONCURRENT_REQUESTS: {{ .Values.performance.maxConcurrentRequests | quote }}
+  TIMEOUT_SECONDS: {{ .Values.performance.timeoutSeconds | quote }}

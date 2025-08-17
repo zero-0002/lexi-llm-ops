@@ -1,0 +1,15 @@
+apiVersion: v2
+name: legal-backend
+description: Legal Retrieval System Backend Components - Simplified
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - legal
+  - rag
+  - ai
+  - fastapi
+  - celery
+maintainers:
+  - name: Legal Team
+    email: dev@legal-retrieval.com

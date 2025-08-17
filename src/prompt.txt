@@ -1,0 +1,93 @@
+
+Giờ hiện tại: 2025-08-13 20:41:24.
+
+Bạn là trợ lý pháp lý thông minh và chuyên nghiệp.
+
+Người dùng sẽ gửi một truy vấn gồm nhiều câu hỏi khác nhau. Nhiệm vụ của bạn là:
+
+1. Phân tích truy vấn để tách ra từng câu hỏi riêng biệt, đầy đủ và chi tiết.
+2. Trả lời từng câu hỏi một cách rõ ràng, chi tiết và đầy đủ.
+3. Nếu có thông tin hỗ trợ từ các nguồn bên dưới, hãy sử dụng để trả lời chính xác.
+4. Cuối cùng tổng hợp lại thành câu trả lời hoàn chỉnh.
+5. Đối với mọi câu trả lời liên quan đến quy định pháp luật, luôn cung cấp một mục "Căn cứ pháp lý" ở cuối câu trả lời.
+Thông tin hỗ trợ:
+
+- Văn bản pháp luật nội bộ (có thể chứa thông tin cũ hoặc dữ liệu đã lưu):
+"Điều 190. Gửi đơn khởi kiện đến Tòa án
+1. Người khởi kiện gửi đơn khởi kiện kèm theo tài liệu, chứng cứ mà mình hiện có đến Tòa án có thẩm quyền giải quyết vụ án bằng các phương thức sau đây:
+a) Nộp trực tiếp tại Tòa án;
+b) Gửi đến Tòa án theo đường dịch vụ bưu chính;
+c) Gửi trực tuyến bằng hình thức điện tử qua Cổng thông tin điện tử của Tòa án (nếu có).
+...
+
+Việc áp dụng pháp luật về thời hiệu khởi kiện tuân theo quy định tại Điều 777 của Bộ luật dân sự.
+
+Điều 2. Thủ tục nhận đơn khởi kiện, đơn yêu cầu tại Tòa án
+1. Khi nhận được đơn khởi kiện vụ án về tranh chấp dân sự, hôn nhân và gia đình, kinh doanh, thương mại, lao động; đơn yêu cầu công nhận thuận tình ly hôn; đơn khởi kiện vụ án hành chính kèm theo tài liệu, chứng cứ theo quy định tại Điều 190 của Bộ luật Tố tụng dân sự, Điều 119 của Luật Tố tụng hành chính, Tòa án ghi vào sổ nhận đơn, xác nhận việc nhận đơn theo quy định tại khoản 1 Điều 191 của Bộ luật Tố tụng dân sự, khoản 1 Điều 121 của Luật Tố tụng hành chính.
+2. Trong thời hạn 02 ngày làm việc kể từ ngày nhận được đơn khởi kiện, đơn yêu cầu theo quy định tại khoản 1 Điều này, bộ phận tiếp nhận đơn xem xét đơn và báo cáo để Chánh án xử lý đơn như sau:
+a) Phân công Thẩm phán xem xét, giải quyết đơn khởi kiện, đơn yêu cầu theo quy định của Bộ luật Tố tụng dân sự, Luật Tố tụng hành chính nếu vụ việc dân sự, khiếu kiện hành chính thuộc trường hợp quy định tại các khoản 1, 2, 4, 5, 6 và 7 Điều 19 của Luật Hòa giải, đối thoại tại Tòa án; các điểm a, b, c, đ và g khoản 1 Điều 192 của Bộ luật Tố tụng dân sự; các điểm a, b, c, d, đ và e khoản 1 Điều 123, điểm g khoản 1 Điều 143 của Luật Tố tụng hành chính;
+b) Thực hiện thủ tục thông báo cho người khởi kiện, người yêu cầu biết về quyền được lựa chọn hòa giải, đối thoại và lựa chọn Hòa giải viên theo quy định tại Điều 3 của Thông tư này nếu không thuộc trường hợp quy định tại điểm a khoản 2 Điều này.
+
+Khoản 1.2. Đối với giao dịch dân sự được xác lập từ ngày 1/7/1996 đến trước ngày 1/1/2005 mà Bộ luật Dân sự và các văn bản pháp luật khác không có quy định thời hiệu khởi kiện, thời hiệu yêu cầu, thì kể từ ngày 1/1/2005 (ngày Bộ luật Tố tụng dân sự được Quốc hội thông qua ngày 15/6/2004 có hiệu lực) việc xác định thời hiệu khởi kiện, thời hiệu yêu cầu được thực hiện theo quy định tại Điều 159 của Bộ luật Tố tụng dân sự; cụ thể như sau:
+a) Thời hiệu khởi kiện để yêu cầu Toà án giải quyết vụ án dân sự là hai năm, kể từ ngày 01/01/2005, nếu tranh chấp phát sinh trước ngày 01/01/2005 hoặc kể từ ngày phát sinh tranh chấp, nếu tranh chấp phát sinh từ ngày 01/01/2005.
+b) Thời hiệu yêu cầu để Toà án giải quyết việc dân sự là một năm, kể từ ngày 01/01/2005, nếu quyền yêu cầu phát sinh trước ngày 01/01/2005 hoặc kể từ ngày phát sinh quyền yêu cầu, nếu yêu cầu phát sinh từ ngày 01/01/2005.
+
+"Điều 157. Bắt đầu lại thời hiệu khởi kiện vụ án dân sự
+1. Thời hiệu khởi kiện vụ án dân sự bắt đầu lại trong trường hợp sau đây:
+a) Bên có nghĩa vụ đã thừa nhận một phần hoặc toàn bộ nghĩa vụ của mình đối với người khởi kiện;
+b) Bên có nghĩa vụ thừa nhận hoặc thực hiện xong một phần nghĩa vụ của mình đối với người khởi kiện;
+c) Các bên đã tự hòa giải với nhau.
+2. Thời hiệu khởi kiện vụ án dân sự bắt đầu lại kể từ ngày tiếp theo sau ngày xảy ra sự kiện quy định tại khoản 1 Điều này."
+
+"Điều 154. Bắt đầu thời hiệu khởi kiện vụ án dân sự, thời hiệu yêu cầu giải quyết việc dân sự
+1. Thời hiệu khởi kiện vụ án dân sự được tính từ ngày người có quyền yêu cầu biết hoặc phải biết quyền, lợi ích hợp pháp của mình bị xâm phạm, trừ trường hợp pháp luật có quy định khác.
+2. Thời hiệu yêu cầu giải quyết việc dân sự được tính từ ngày phát sinh quyền yêu cầu, trừ trường hợp pháp luật có quy định khác."
+
+Người chưa thành niên, người mất năng lực hành vi dân sự, người có khó khăn trong nhận thức, làm chủ hành vi, người bị hạn chế năng lực hành vi dân sự chưa có người đại diện khác thay thế trong trường hợp sau đây:
+a) Người đại diện chết nếu là cá nhân, chấm dứt tồn tại nếu là pháp nhân;
+b) Người đại diện vì lý do chính đáng mà không thể tiếp tục đại diện được.
+Điều 157. Bắt đầu lại thời hiệu khởi kiện vụ án dân sự
+1. Thời hiệu khởi kiện vụ án dân sự bắt đầu lại trong trường hợp sau đây:
+a) Bên có nghĩa vụ đã thừa nhận một phần hoặc toàn bộ nghĩa vụ của mình đối với người khởi kiện;
+b) Bên có nghĩa vụ thừa nhận hoặc thực hiện xong một phần nghĩa vụ của mình đối với người khởi kiện;
+c) Các bên đã tự hòa giải với nhau.
+2. Thời hiệu khởi kiện vụ án dân sự bắt đầu lại kể từ ngày tiếp theo sau ngày xảy ra sự kiện quy định tại khoản 1 Điều này. Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN
+
+Quyền khởi kiện vụ án tại Tòa án
+a) Người khiếu nại có quyền khởi kiện vụ án tại Tòa án theo quy định của pháp luật tố tụng dân sự trong trường hợp sau đây:
+- Có căn cứ cho rằng quyết định, hành vi của người sử dụng lao động; tổ chức, cá nhân tham gia hoạt động giáo dục nghề nghiệp; doanh nghiệp, tổ chức sự nghiệp đưa người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng là trái pháp luật, xâm phạm trực tiếp đến quyền, lợi ích hợp pháp của mình;
+- Không đồng ý với quyết định giải quyết khiếu nại lần đầu theo quy định tại Điều 23 Nghị định này;
+- Đã hết thời hạn quy định tại Điều 20 Nghị định này mà khiếu nại lần đầu không được giải quyết.
+b) Người khiếu nại có quyền khởi kiện vụ án tại Tòa án theo quy định của pháp luật tố tụng hành chính trong trường hợp sau đây:
+- Không đồng ý với quyết định giải quyết khiếu nại lần hai theo quy định tại Điều 31 Nghị định này;
+- Đã hết thời hạn quy định tại Điều 28 Nghị định này mà khiếu nại lần hai không được giải quyết.
+3. Người khiếu nại có nghĩa vụ sau đây:
+a) Thực hiện khiếu nại theo đúng trình tự, thủ tục quy định tại Nghị định này;
+b) Trình bày trung thực sự việc, đưa ra chứng cứ về việc khiếu nại; cung cấp thông tin, tài liệu liên quan cho người giải quyết khiếu nại; chịu trách nhiệm trước pháp luật về nội dung trình bày và việc cung cấp thông tin, tài liệu đó;
+c) Chấp hành nghiêm chỉnh quyết định giải quyết khiếu nại có hiệu lực pháp luật.
+4. Người khiếu nại thực hiện quyền và nghĩa vụ khác theo quy định của pháp luật.
+
+Khoản 1.3. Đối với giao dịch dân sự được xác lập từ ngày 01/01/2005 mà Bộ luật Dân sự và các văn bản pháp luật khác không có quy định thời hiệu khởi kiện, thời hiệu yêu cầu, thì thời hiệu khởi kiện, thời hiệu yêu cầu được thực hiện theo quy định tại Điều 159 của Bộ luật Tố tụng dân sự.
+
+"Điều 118. Đơn khởi kiện
+1. Đơn khởi kiện phải có các nội dung chính sau đây:
+a) Ngày, tháng, năm làm đơn;
+b) Tòa án được yêu cầu giải quyết vụ án hành chính;
+c) Tên, địa chỉ; số điện thoại, số fax, địa chỉ thư điện tử (nếu có) của người khởi kiện, người bị kiện, người có quyền lợi, nghĩa vụ liên quan;
+d) Nội dung quyết định hành chính, quyết định kỷ luật buộc thôi việc, quyết định giải quyết khiếu nại về quyết định xử lý vụ việc cạnh tranh, quyết định giải quyết khiếu nại trong hoạt động kiểm toán nhà nước nội dung giải quyết khiếu nại về danh sách cử tri hoặc tóm tắt diễn biến của hành vi hành chính;
+đ) Nội dung quyết định giải quyết khiếu nại (nếu có);
+e) Yêu cầu đề nghị Tòa án giải quyết;
+g) Cam đoan về việc không đồng thời khiếu nại đến người có thẩm quyền giải quyết khiếu nại.
+2. Kèm theo đơn khởi kiện phải có tài liệu, chứng cứ chứng minh quyền, lợi ích hợp pháp của người khởi kiện bị xâm phạm. Trường hợp vì lý do khách quan mà người khởi kiện không thể nộp đầy đủ các tài liệu, chứng cứ kèm theo đơn khởi kiện thì họ phải nộp tài liệu, chứng cứ hiện có để chứng minh quyền, lợi ích hợp pháp của người khởi kiện bị xâm phạm. Các tài liệu, chứng cứ khác, người khởi kiện phải tự mình bổ sung hoặc bổ sung theo yêu cầu của Tòa án trong quá trình giải quyết vụ án."
+
+- Thông tin bổ sung mới từ web (cập nhật, bổ sung):
+
+
+---
+
+Câu hỏi của người dùng:
+điều kiện mua bán nhà đất mới nhất
+
+---
+
+Câu trả lời:

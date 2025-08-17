@@ -1,0 +1,146 @@
+# Default values for legal-backend chart
+
+# Component type: api or celery-worker
+component: api
+
+# Image configuration
+image:
+  repository: legal-retrieval/backend-api
+  tag: "dev-latest"
+  pullPolicy: Always
+
+# Replica configuration
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8000
+
+# Environment variables
+env:
+  APP_NAME: "Legal Backend API"
+  DEBUG: "true"
+  API_V1_STR: "/api"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  
+  # Database connections (will be overridden in helmfile)
+  MONGO_URL: "mongodb://localhost:27017/legaldb"
+  REDIS_URL: "redis://localhost:6379/0"
+  REDIS_URL_WS: "redis://localhost:6379/1"
+  REDIS_URL_RETRIEVAL: "redis://localhost:6379/2"
+  QDRANT_URL: "http://localhost:6333"
+
+# Celery worker specific configuration
+worker:
+  type: rag
+  queues: "rag_queue,embed_queue"
+  concurrency: 2
+  logLevel: INFO
+
+# Resource configuration
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Autoscaling configuration (disabled for development)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  path: "/health"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  path: "/ready"
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: api.legal-retrieval.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Auth configuration
+auth:
+  jwtSecret: ""
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "json"
+  requestLogging: true
+
+# Model configuration
+model:
+  embedding: "sentence-transformers/all-MiniLM-L6-v2"
+  llm: "gpt-3.5-turbo"
+
+# Performance configuration
+performance:
+  maxConcurrentRequests: 10
+  requestTimeout: 300
+  workerThreads: 1
+
+# Database connections
+mongodb:
+  host: "localhost"
+  port: "27017"
+  database: "legal_db"
+  url: ""
+  username: ""
+  password: ""
+
+redis:
+  host: "localhost"
+  port: "6379"
+  url: ""
+  password: ""
+
+qdrant:
+  host: "localhost"
+  port: "6333"
+  url: ""
+
+# OpenAI configuration
+openai:
+  apiKey: ""
+
+# Secrets
+secrets: {}

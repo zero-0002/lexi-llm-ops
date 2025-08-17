@@ -1,0 +1,28 @@
+# Values for celery worker - retrieval type
+# This worker handles document retrieval tasks
+
+workerType: retrieval
+
+image:
+  repository: legal-retrieval/backend
+  tag: latest
+  pullPolicy: Always
+
+worker:
+  name: "celery-worker-retrieval"
+  concurrency: 2
+  queues: "retrieval_queue"
+  logLevel: "INFO"
+
+resources:
+  requests:
+    memory: "1Gi" 
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1"
+
+env:
+  CELERY_QUEUES: "retrieval_queue"
+  WORKER_TYPE: "retrieval"
+  LOG_LEVEL: "INFO"

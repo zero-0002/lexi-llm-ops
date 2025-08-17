@@ -1,0 +1,316 @@
+# Legal Retrieval System - Development Environment
+# ================================================
+# Volume mounts for live code editing and development
+
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: legal-dozzle-dev
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "9999:8080"
+  # ===================
+  # DATABASE SERVICES
+  # ===================
+  
+  mongodb:
+    image: mongo:7.0
+    container_name: legal-mongodb-dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: legaldb_dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - legal-dev-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: legal-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - legal-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  qdrant:
+    image: qdrant/qdrant:v1.8.4
+    container_name: legal-qdrant-dev
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+    volumes:
+      - qdrant_dev_data:/qdrant/storage
+    networks:
+      - legal-dev-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+
+  # ===================
+  # DEVELOPMENT BACKEND
+  # ===================
+
+  backend-api-dev:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile.dev
+    container_name: legal-backend-dev
+    restart: unless-stopped
+    environment:
+      # Development environment
+      DOCKER_ENV: "true"
+      DEBUG: "true"
+      LOG_LEVEL: "DEBUG"
+      
+      # Database connections
+      MONGO_URI: "mongodb://admin:password123@mongodb:27017/legal_chatbot_db?authSource=admin"
+      REDIS_URL: "redis://redis:6379/0"
+      REDIS_WS_URL: "redis://redis:6379/1"
+      REDIS_RETRIEVAL_URL: "redis://redis:6379/2"
+      CELERY_BROKER_URL: "redis://redis:6379/3"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/4"
+      QDRANT_URL: "http://qdrant:6333"
+      
+      # API Keys (load from .env)
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      SERPER_API_KEY: "${SERPER_API_KEY:-}"
+      
+      # Development settings
+      UVICORN_RELOAD: "true"
+      PYTHONPATH: "/app:/app/src/app"
+      WORKDIR: "/app"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for live editing
+      - ./src/app:/app:cached
+      - ./src/app:/app/app:cached  # Create app symlink for imports
+      - ./data:/app/data:cached
+      - ./tests:/app/tests:cached
+      
+      # Mount config files
+      - ./.env:/app/.env:ro
+      
+      # Development logs
+      - dev_logs:/app/logs
+    networks:
+      - legal-dev-network
+    depends_on:
+      - redis
+      - mongodb
+      - qdrant
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      bash -c "
+        echo '🚀 Starting Legal Backend Development Server...';
+        cd /app;
+        export PYTHONPATH=/app:$PYTHONPATH;
+        python wait-for-services.py;
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app
+      "
+
+  # ===================
+  # DEVELOPMENT WORKERS
+  # ===================
+
+  celery-worker-dev:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile.dev
+    container_name: legal-celery-worker-dev
+    restart: unless-stopped
+    environment:
+      DOCKER_ENV: "true"
+      DEBUG: "true"
+      LOG_LEVEL: "DEBUG"
+      
+      # Database connections
+      MONGO_URI: "mongodb://admin:password123@mongodb:27017/legal_chatbot_db?authSource=admin"
+      REDIS_URL: "redis://redis:6379/0"
+      REDIS_WS_URL: "redis://redis:6379/1"
+      REDIS_RETRIEVAL_URL: "redis://redis:6379/2"
+      CELERY_BROKER_URL: "redis://redis:6379/3"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/4"
+      QDRANT_URL: "http://qdrant:6333"
+      
+      # API Keys
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      SERPER_API_KEY: "${SERPER_API_KEY:-}"
+      
+      # Worker settings
+      CELERY_LOGLEVEL: "debug"
+      PYTHONPATH: "/app:/app/src/app"
+      WORKDIR: "/app"
+    volumes:
+      - ./src/app:/app:cached
+      - ./src/app:/app/app:cached  # Create app symlink for imports
+      - ./data:/app/data:cached
+      - dev_logs:/app/logs
+      - ./.env:/app/.env:ro
+    networks:
+      - legal-dev-network
+    depends_on:
+      - redis
+      - mongodb
+      - qdrant
+      - backend-api-dev
+    command: >
+      bash -c "
+        echo '⚙️ Starting Legal Celery Worker Development...';
+        cd /app;
+        export PYTHONPATH=/app:$PYTHONPATH;
+        python wait-for-services.py;
+        celery -A app.celery_worker worker --loglevel=debug --pool=solo --queues=rag_queue,embed_queue,retrieval_queue,link_extract_queue
+      "
+
+  celery-flower-dev:
+    build:
+      context: ./src/app
+      dockerfile: Dockerfile.dev
+    container_name: legal-celery-flower-dev
+    restart: unless-stopped
+    environment:
+      CELERY_BROKER_URL: "redis://redis:6379/3"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/4"
+    ports:
+      - "5555:5555"
+    volumes:
+      - flower_dev_data:/app/flower_data
+    networks:
+      - legal-dev-network
+    depends_on:
+      - redis
+      - celery-worker-dev
+    command: >
+      bash -c "
+        echo '🌸 Starting Celery Flower Development...';
+        celery -A app.celery_worker flower --port=5555 --broker=redis://redis:6379/3
+      "
+
+  # ===================
+  # DEVELOPMENT TOOLS
+  # ===================
+
+  # Frontend React Application
+  frontend-dev:
+    build:
+      context: ./src/legal-chatbot-fe
+      dockerfile: Dockerfile
+    container_name: legal-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - legal-dev-network
+    depends_on:
+      - backend-api-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Streamlit Frontend Alternative
+  streamlit-frontend-dev:
+    build:
+      context: ./src/streamlit-fe
+      dockerfile: Dockerfile.dev
+    container_name: legal-streamlit-dev
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      BACKEND_API_URL: "http://backend-api-dev:8000"
+      STREAMLIT_SERVER_PORT: 8501
+      STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
+      PYTHONPATH: "/app"
+    volumes:
+      - ./src/streamlit-fe:/app:cached
+    networks:
+      - legal-dev-network
+    depends_on:
+      - backend-api-dev
+
+  # Database management interface
+  mongo-express-dev:
+    image: mongo-express
+    container_name: legal-mongo-express-dev
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password123
+    networks:
+      - legal-dev-network
+    depends_on:
+      - mongodb
+
+  # Redis management interface
+  redis-commander-dev:
+    image: rediscommander/redis-commander:latest
+    container_name: legal-redis-commander-dev
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+    networks:
+      - legal-dev-network
+    depends_on:
+      - redis
+
+# ===================
+# VOLUMES
+# ===================
+
+volumes:
+  mongodb_dev_data:
+  redis_dev_data:
+  qdrant_dev_data:
+  dev_logs:
+  flower_dev_data:
+
+# ===================
+# NETWORKS
+# ===================
+
+networks:
+  legal-dev-network:
+    driver: bridge
+    name: legal-dev-network

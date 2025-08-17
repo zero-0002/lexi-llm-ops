@@ -1,0 +1,177 @@
+# Legal Backend API - Simplified Configuration
+# ===========================================
+
+component: api
+
+image:
+  repository: legal-retrieval/backend
+  tag: "latest"
+  pullPolicy: Never
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8000
+
+env:
+  DOCKER_ENV: "true"
+  APP_NAME: "Legal Retrieval System"
+  DEBUG: "true"
+  LOG_LEVEL: "INFO"
+  API_V1_STR: "/api"
+  
+  # Database connections (matching docker-compose)
+  MONGO_URL: "mongodb://admin:password123@legal-mongodb:27017/legaldb?authSource=admin"
+  REDIS_URL: "redis://legal-redis:6379/0"
+  REDIS_URL_WS: "redis://legal-redis:6379/1" 
+  REDIS_URL_RETRIEVAL: "redis://legal-redis:6379/2"
+  QDRANT_URL: "http://legal-qdrant:6333"
+  
+  # Celery configuration
+  CELERY_BROKER_URL: "redis://legal-redis:6379/3"
+  CELERY_RESULT_BACKEND: "redis://legal-redis:6379/4"
+  
+  # API configuration
+  CORS_ORIGINS: '["http://localhost:3000", "http://localhost:5173", "http://legal-frontend.application.svc.cluster.local"]'
+  UVICORN_WORKERS: "1"
+  WORKER_TIMEOUT: "300"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  
+  # Database connections (cross-namespace)
+  MONGO_URL: "mongodb://legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
+  REDIS_URL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/0"
+  REDIS_URL_WS: "redis://legal-redis-master.data-service.svc.cluster.local:6379/1"
+  REDIS_URL_RETRIEVAL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/2"
+  QDRANT_URL: "http://legal-qdrant.data-service.svc.cluster.local:6333"
+  MONGO_URI: "mongodb://admin:password123@legal-mongodb:27017/legal_chatbot_db?authSource=admin"
+  REDIS_URL: "redis://legal-redis:6379/0"
+  CELERY_BROKER_URL: "redis://legal-redis:6379/3"
+  QDRANT_URL: "http://legal-qdrant:6333"
+
+# Simple health check
+healthCheck:
+  enabled: true
+  path: "/health"
+
+readinessProbe:
+  enabled: false
+  path: "/ready"
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Volume configuration
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: cache
+    mountPath: /app/cache
+
+# Node selector and scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Network policy
+networkPolicy:
+  enabled: false
+
+# Database Connections
+mongodb:
+  url: "mongodb://legal-mongodb.data-service.svc.cluster.local:27017/legal_db"
+  host: "legal-mongodb.data-service.svc.cluster.local"
+  port: "27017"
+  database: "legal_db"
+  username: ""
+  password: ""
+
+redis:
+  url: "redis://legal-redis-master.data-service.svc.cluster.local:6379"
+  host: "legal-redis-master.data-service.svc.cluster.local"
+  port: "6379"
+  password: ""
+
+# Vector Database
+qdrant:
+  url: "http://legal-qdrant.data-service.svc.cluster.local:6333"
+  host: "legal-qdrant.data-service.svc.cluster.local"
+  port: "6333"
+
+# Model Configuration
+model:
+  embedding: "sentence-transformers/all-MiniLM-L6-v2"
+  llm: "gpt-3.5-turbo"
+
+# Performance Configuration
+performance:
+  maxConcurrentRequests: 10
+  requestTimeout: 300
+  workerThreads: 1
+
+# OpenAI Configuration
+openai:
+  apiKey: ""  # Set this in production
+
+# Auth configuration
+auth:
+  jwtSecret: ""  # Set this in production
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "json"
+  requestLogging: true
+
+# Ingress configuration
+ingress:
+  enabled: false  # Disabled for development
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: api.legal-retrieval.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Secrets (empty for development)
+secrets: {}

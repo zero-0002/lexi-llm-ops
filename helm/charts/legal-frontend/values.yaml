@@ -1,0 +1,196 @@
+# Default values for legal-frontend chart
+
+# Image configuration
+image:
+  repository: legal-retrieval/frontend
+  tag: "dev-latest"
+  pullPolicy: Always
+
+# Replica configuration
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Configuration for the application
+config:
+  # API configuration
+  apiBaseUrl: "http://legal-backend-api:8000"
+  apiTimeout: "30000"
+  
+  # App configuration
+  appTitle: "Legal Retrieval System"
+  appDescription: "AI-powered legal document retrieval and chat system"
+  
+  # Feature flags
+  enableChat: "true"
+  enableDocumentSearch: "true"
+  enableHistory: "true"
+  
+  # UI configuration
+  theme: "light"
+  language: "vi"
+  maxChatHistory: "100"
+
+# Resource configuration
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+# Autoscaling configuration (disabled for development)
+autoscaling:
+  enabled: false
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  fsGroup: 101
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Global configuration
+global:
+  imagePullSecrets: []
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: legal-retrieval.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false
+
+# Resources
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Volume mounts
+volumeMounts: []
+
+# Volumes  
+volumes: []
+
+# Health checks
+livenessProbe:
+  enabled: true
+  path: /health
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  path: /health
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+# Nginx configuration
+nginx:
+  enabled: true
+  port: 80
+  serverName: "legal-retrieval.local"
+  clientMaxBodySize: "10m"
+  workerProcesses: "auto"
+  workerConnections: 1024
+  config: |
+    server {
+        listen 80;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+        
+        # Gzip compression
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        
+        # API proxy
+        location /api/ {
+            proxy_pass http://legal-backend-api.application.svc.cluster.local:8000/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_connect_timeout 300s;
+            proxy_send_timeout 300s;
+            proxy_read_timeout 300s;
+        }
+        
+        # WebSocket support for real-time features
+        location /ws/ {
+            proxy_pass http://legal-backend-api.application.svc.cluster.local:8000/ws/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # React Router support (catch-all)
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+        
+        # Static assets with caching
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+        
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+        }
+    }

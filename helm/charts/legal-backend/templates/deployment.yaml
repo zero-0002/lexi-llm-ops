@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "legal-backend.fullname" . }}
+  labels:
+    {{- include "legal-backend.labels" . | nindent 4 }}
+    component: {{ .Values.component }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "legal-backend.selectorLabels" . | nindent 6 }}
+      component: {{ .Values.component }}
+  template:
+    metadata:
+      labels:
+        {{- include "legal-backend.selectorLabels" . | nindent 8 }}
+        component: {{ .Values.component }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if eq .Values.component "api" }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.env.PORT | default 8000 }}
+              protocol: TCP
+          {{- end }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- if eq .Values.component "celery-worker" }}
+            - name: CELERY_WORKER_TYPE
+              value: {{ .Values.worker.type | quote }}
+            - name: CELERY_QUEUES
+              value: {{ .Values.worker.queues | quote }}
+            - name: CELERY_CONCURRENCY
+              value: {{ .Values.worker.concurrency | quote }}
+            - name: CELERY_LOG_LEVEL
+              value: {{ .Values.worker.logLevel | quote }}
+            {{- end }}
+          {{- if eq .Values.component "api" }}
+          {{- if .Values.healthCheck.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.healthCheck.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

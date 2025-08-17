@@ -1,0 +1,129 @@
+# Default values for legal-celery-worker chart
+
+# Image configuration
+image:
+  repository: legal-retrieval/backend
+  tag: "latest"
+  pullPolicy: Never
+
+# Deployment configuration
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+
+# Worker-specific configuration
+worker:
+  type: rag
+  queues: "rag_queue,embed_queue"
+  concurrency: 2
+  logLevel: INFO
+  maxTasksPerChild: 1000
+  prefetchMultiplier: 1
+  pool: "eventlet"
+
+# Environment variables
+env:
+  # Celery configuration
+  CELERY_WORKER_TYPE: "rag"
+  CELERY_QUEUES: "rag_queue,embed_queue"
+  CELERY_CONCURRENCY: "2"
+  CELERY_LOG_LEVEL: "INFO"
+  
+  # Application configuration
+  APP_NAME: "Legal Celery Worker"
+  DEBUG: "false"
+  
+  # Database connections (will be overridden in values)
+  MONGO_URL: "mongodb://localhost:27017/legaldb"
+  REDIS_URL: "redis://localhost:6379/0"
+  QDRANT_URL: "http://localhost:6333"
+
+# Resource configuration
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1000m"
+
+# Autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Liveness probe for Celery worker
+livenessProbe:
+  enabled: true
+  exec:
+    command:
+      - /bin/sh
+      - -c
+      - "celery -A app.celery_worker inspect ping -d celery@$HOSTNAME"
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Volume configuration
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: cache
+    mountPath: /app/cache
+
+# Node selector and scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "false"
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Termination grace period
+terminationGracePeriodSeconds: 60
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# Network policy
+networkPolicy:
+  enabled: false

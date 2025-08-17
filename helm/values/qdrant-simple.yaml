@@ -1,0 +1,56 @@
+# Simplified Qdrant Configuration for Legal Retrieval System
+# =======================================================
+
+# Disable init containers that cause permission issues
+image:
+  repository: qdrant/qdrant
+  tag: "v1.8.4"
+  pullPolicy: IfNotPresent
+
+# Simple service configuration  
+service:
+  type: ClusterIP
+  http:
+    port: 6333
+  grpc:
+    port: 6334
+
+# Persistence with correct storage class
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: "standard"
+  accessModes:
+    - ReadWriteOnce
+
+# Resource limits
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1000m"
+
+# Simple configuration without complex cluster setup
+config:
+  service:
+    http_port: 6333
+    grpc_port: 6334
+    enable_cors: true
+  log_level: INFO
+  storage:
+    on_disk_payload: true
+
+# Simplified security context - let Kubernetes handle permissions
+securityContext:
+  runAsNonRoot: false
+  runAsUser: 0
+  runAsGroup: 0
+  fsGroup: 0
+
+# Disable init containers
+initContainers: []
+
+# Single replica for simplicity
+replicaCount: 1

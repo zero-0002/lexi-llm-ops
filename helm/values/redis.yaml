@@ -1,0 +1,73 @@
+# Redis - Simplified Configuration (Production-like)
+# =================================================
+
+auth:
+  enabled: false
+
+architecture: standalone
+
+master:
+  persistence:
+    enabled: false
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      redis: 6379
+
+  # Redis configuration
+  configuration: |
+    # Redis configuration for Legal Retrieval System
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+    timeout 0
+    tcp-keepalive 300
+    # Enable AOF persistence
+    appendonly yes
+    appendfsync everysec
+    # Database configuration
+    databases 16
+
+# Replica configuration (disabled for development)
+replica:
+  replicaCount: 0
+
+# Sentinel configuration (disabled)
+sentinel:
+  enabled: false
+
+# Metrics and monitoring
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+
+# Security context
+securityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Pod security context
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
+
+# Common configuration
+commonConfiguration: |
+  # Enable keyspace notifications for expired events
+  notify-keyspace-events Ex
+  # Disable protected mode for development
+  protected-mode no

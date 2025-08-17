@@ -1,0 +1,28 @@
+# Values for celery worker - embed type
+# This worker handles document embedding tasks
+
+workerType: embed
+
+image:
+  repository: legal-retrieval/backend
+  tag: latest
+  pullPolicy: Always
+
+worker:
+  name: "celery-worker-embed"
+  concurrency: 2
+  queues: "embed_queue"
+  logLevel: "INFO"
+
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1"
+
+env:
+  CELERY_QUEUES: "embed_queue"
+  WORKER_TYPE: "embed"
+  LOG_LEVEL: "INFO"

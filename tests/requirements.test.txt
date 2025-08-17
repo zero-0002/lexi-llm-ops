@@ -1,0 +1,74 @@
+# Test Dependencies for Legal Retrieval API Testing
+# ================================================
+
+# Core testing framework
+pytest==7.4.0
+pytest-asyncio==0.21.1
+pytest-html==3.2.0
+pytest-json-report==1.5.0
+pytest-cov==4.1.0
+pytest-xdist==3.3.1
+pytest-timeout==2.1.0
+pytest-mock==3.11.1
+
+# HTTP testing
+requests==2.31.0
+httpx==0.24.1
+aiohttp==3.8.5
+
+# WebSocket testing
+websockets==11.0.3
+websocket-client==1.6.1
+
+# Database testing
+pymongo==4.4.1
+redis==4.6.0
+motor==3.2.0
+
+# API testing utilities
+fastapi-testclient==0.70.0
+uvicorn==0.23.2
+
+# Data validation and serialization
+pydantic==2.0.3
+pydantic-settings==2.0.2
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6
+email-validator==2.0.0
+passlib==1.7.4
+python-jose==3.3.0
+bcrypt==4.0.1
+
+# Async support
+asyncio==3.4.3
+aiofiles==23.1.0
+
+# JSON and data handling
+orjson==3.9.2
+ujson==5.8.0
+
+# Logging and monitoring
+structlog==23.1.0
+loguru==0.7.0
+
+# Performance testing
+locust==2.15.1
+
+# Mock and fixtures
+factory-boy==3.3.0
+faker==19.3.0
+responses==0.23.1
+
+# Vector database testing
+qdrant-client==1.4.0
+
+# OpenAI testing (mock)
+openai==0.27.8
+
+# Date and time
+python-dateutil==2.8.2
+
+# Environment and configuration
+environs==9.5.0
