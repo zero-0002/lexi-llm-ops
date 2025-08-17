@@ -8,24 +8,39 @@ data:
     apiVersion: argoproj.io/v1alpha1
     kind: ConfigManagementPlugin
     metadata:
-      # Tên duy nhất của plugin
       name: helmfile
     spec:
       init:
         command: ["sh", "-c"]
         args:
           - |
-            echo "===== [INIT] Start Debugging =====" >&2
+            echo "===== [INIT] Start Processing =====" >&2
             echo "App Name: $ARGOCD_APP_NAME" >&2
-            echo "Listing files (ls -la):" >&2
-            echo "Searching for helmfile.yaml:" >&2
-            find . -name "helmfile.yaml" >&2
-            echo "Searching for Chart.yaml:" >&2
-            find . -name "Chart.yaml" >&2
-            echo "===== [INIT] End Debugging =====" >&2
+            
+            # Check if we have helmfile.yaml
             if [ -f "helmfile.yaml" ]; then
-              helmfile repos
+              echo "Found helmfile.yaml, setting up repositories..." >&2
+              
+              # Set Helm timeout and retry settings
+              export HELM_TIMEOUT="300s"
+              
+              # Add repositories with retry logic
+              for i in 1 2 3; do
+                echo "Repository setup attempt $i/3..." >&2
+                if timeout 60 helmfile repos --timeout 60; then
+                  echo "Repositories setup successful!" >&2
+                  break
+                elif [ "$i" -eq 3 ]; then
+                  echo "Warning: Repository setup failed after 3 attempts, continuing..." >&2
+                else
+                  echo "Attempt $i failed, retrying..." >&2
+                  sleep 5
+                fi
+              done
+            else
+              echo "No helmfile.yaml found, skipping repository setup" >&2
             fi
+            echo "===== [INIT] End Processing =====" >&2
       generate:
         command: ["sh", "-c"]
         args:
@@ -34,16 +49,40 @@ data:
             echo "ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
             echo "HELM_SELECTOR: $HELM_SELECTOR" >&2
             
+            # Set Helm and Helmfile timeouts
+            export HELM_TIMEOUT="300s"
+            
             if [ -f "Chart.yaml" ]; then
               echo "Using Helm template for Chart.yaml" >&2
-              helm template .
+              timeout 300 helm template . --timeout 300s
             elif [ -f "helmfile.yaml" ]; then
               if [ -n "$HELM_SELECTOR" ]; then
                 echo "Using Helmfile with selector: $HELM_SELECTOR" >&2
-                helmfile -l "$HELM_SELECTOR" template --include-crds
+                timeout 300 helmfile -l "$HELM_SELECTOR" template --include-crds --timeout 300
               else
-                echo "No HELM_SELECTOR provided, using ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
-                helmfile -l app=$ARGOCD_APP_NAME template --include-crds
+                echo "No HELM_SELECTOR provided, deriving from ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
+                
+                # Map ArgoCD app names to helmfile selectors
+                case "$ARGOCD_APP_NAME" in
+                  "legal-mongodb") SELECTOR="app=legal-mongodb" ;;
+                  "legal-redis") SELECTOR="app=legal-redis" ;;
+                  "legal-qdrant") SELECTOR="app=legal-qdrant" ;;
+                  "setup-secrets") SELECTOR="app=setup-secrets" ;;
+                  "legal-backend") SELECTOR="app=legal-backend" ;;
+                  "legal-frontend") SELECTOR="app=legal-frontend" ;;
+                  "legal-celery-worker") SELECTOR="app=legal-celery-worker" ;;
+                  "prometheus-stack") SELECTOR="app=prometheus-stack" ;;
+                  "loki") SELECTOR="app=loki" ;;
+                  "promtail") SELECTOR="app=promtail" ;;
+                  # Legacy mapping for old-style names
+                  "mongo") SELECTOR="app=legal-mongodb" ;;
+                  "redis") SELECTOR="app=legal-redis" ;;
+                  "qdrant") SELECTOR="app=legal-qdrant" ;;
+                  *) SELECTOR="app=$ARGOCD_APP_NAME" ;;
+                esac
+                
+                echo "Mapped selector: $SELECTOR" >&2
+                timeout 300 helmfile -l "$SELECTOR" template --include-crds --timeout 300
               fi
             else
               echo "[ERROR] No Chart.yaml or helmfile.yaml found!" >&2

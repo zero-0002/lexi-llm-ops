@@ -1,6 +1,9 @@
 # Legal Backend API - Simplified Configuration
 # ===========================================
 
+# Legal Backend API - System Configuration Only
+# ============================================
+
 component: api
 
 image:
@@ -14,40 +17,58 @@ service:
   type: ClusterIP
   port: 8000
 
+# System Environment Variables (non-secret)
 env:
   DOCKER_ENV: "true"
   APP_NAME: "Legal Retrieval System"
   DEBUG: "true"
   LOG_LEVEL: "INFO"
   API_V1_STR: "/api"
+  HOST: "0.0.0.0"
+  PORT: "8000"
   
-  # Database connections (matching docker-compose)
-  MONGO_URL: "mongodb://admin:password123@legal-mongodb:27017/legaldb?authSource=admin"
-  REDIS_URL: "redis://legal-redis:6379/0"
-  REDIS_URL_WS: "redis://legal-redis:6379/1" 
-  REDIS_URL_RETRIEVAL: "redis://legal-redis:6379/2"
-  QDRANT_URL: "http://legal-qdrant:6333"
+  # Database connections (non-secret parts)
+  MONGO_URI: "mongodb://legal_user@legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
+  MONGO_DATABASE: "legaldb"
+  MONGO_USER: "legal_user"
+  
+  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB_DEFAULT: "0"
+  REDIS_DB_WS: "1"
+  REDIS_DB_RETRIEVAL: "2"
+  REDIS_DB_CELERY: "3"
+  REDIS_DB_RESULT: "4"
+  
+  QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  QDRANT_COLLECTION: "legal_documents"
+  
+  # OpenAI Configuration (non-secret)
+  OPENAI_MODEL: "gpt-3.5-turbo"
+  OPENAI_EMBEDDING_MODEL: "text-embedding-ada-002"
   
   # Celery configuration
-  CELERY_BROKER_URL: "redis://legal-redis:6379/3"
-  CELERY_RESULT_BACKEND: "redis://legal-redis:6379/4"
+  CELERY_TASK_SERIALIZER: "json"
+  CELERY_RESULT_SERIALIZER: "json"
+  CELERY_ACCEPT_CONTENT: "application/json"
+  CELERY_TIMEZONE: "Asia/Ho_Chi_Minh"
   
   # API configuration
   CORS_ORIGINS: '["http://localhost:3000", "http://localhost:5173", "http://legal-frontend.application.svc.cluster.local"]'
   UVICORN_WORKERS: "1"
   WORKER_TIMEOUT: "300"
-  HOST: "0.0.0.0"
-  PORT: "8000"
   
-  # Database connections (cross-namespace)
-  MONGO_URL: "mongodb://legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
-  REDIS_URL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/0"
-  REDIS_URL_WS: "redis://legal-redis-master.data-service.svc.cluster.local:6379/1"
-  REDIS_URL_RETRIEVAL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/2"
-  QDRANT_URL: "http://legal-qdrant.data-service.svc.cluster.local:6333"
-  MONGO_URI: "mongodb://admin:password123@legal-mongodb:27017/legal_chatbot_db?authSource=admin"
-  REDIS_URL: "redis://legal-redis:6379/0"
-  CELERY_BROKER_URL: "redis://legal-redis:6379/3"
+  # Performance configuration
+  WORKER_MEMORY_LIMIT: "512MB"
+  MAX_CONCURRENT_TASKS: "10"
+  EMBEDDING_BATCH_SIZE: "100"
+  
+  # Development configuration
+  RELOAD: "true"
+  HOT_RELOAD: "true"
+
+# Secrets will be injected via envFrom in deployment template
   QDRANT_URL: "http://legal-qdrant:6333"
 
 # Simple health check

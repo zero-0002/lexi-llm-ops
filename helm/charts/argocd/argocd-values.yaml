@@ -1,5 +1,12 @@
-# argocd/argocd-values.yaml
+# ArgoCD Configuration with External CMP Plugin
+global:
+  domain: argocd.local
+
+# Use external ConfigMap for CMP plugin instead of built-in
+# Plugin will be loaded from cmp-helmfile-plugin.yaml ConfigMap
+
 repoServer:
+  # Install required tools for CMP plugin
   volumes:
     - name: custom-tools
       emptyDir: {}
@@ -14,17 +21,17 @@ repoServer:
   initContainers:
     - name: download-tools
       image: alpine:3.18
-      # command: ["sh", "-c", "wget https://get.helm.sh/helm-v3.15.2-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /custom-tools/helm && wget https://github.com/helmfile/helmfile/releases/download/v0.165.0/helmfile_0.165.0_linux_amd64.tar.gz -O - | tar -xzO helmfile > /custom-tools/helmfile && chmod +x /custom-tools/helm /custom-tools/helmfile && ln -s /custom-tools/helm /usr/local/bin/helm && ln -s /custom-tools/helmfile /usr/local/bin/helmfile"]
-      command: ["sh", "-c", "wget https://get.helm.sh/helm-v3.15.2-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /custom-tools/helm && wget https://github.com/helmfile/helmfile/releases/download/v0.165.0/helmfile_0.165.0_linux_amd64.tar.gz -O - | tar -xzO helmfile > /custom-tools/helmfile && chmod +x /custom-tools/helm /custom-tools/helmfile"]
-
+      command: ["sh", "-c"]
+      args:
+        - |
+          wget https://get.helm.sh/helm-v3.15.2-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /custom-tools/helm
+          wget https://github.com/helmfile/helmfile/releases/download/v0.165.0/helmfile_0.165.0_linux_amd64.tar.gz -O - | tar -xzO helmfile > /custom-tools/helmfile
+          chmod +x /custom-tools/helm /custom-tools/helmfile
       volumeMounts:
         - name: custom-tools
           mountPath: /custom-tools
 
-  env:
-    - name: PATH
-      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/custom-tools
-
+  # Add CMP sidecar container for external plugin
   extraContainers:
     - name: cmp-helmfile
       image: quay.io/argoproj/argocd:v2.11.7
@@ -36,7 +43,7 @@ repoServer:
         - name: var-files
           mountPath: /var/run/argocd
         - name: cmp-helmfile-plugin
-          mountPath: /home/argocd/cmp-server/config # <-- ĐỊA CHỈ ĐÚNG
+          mountPath: /home/argocd/cmp-server/config
         - name: custom-tools
           mountPath: /usr/local/bin/custom-tools
         - name: plugins
@@ -45,9 +52,17 @@ repoServer:
         - name: PATH
           value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/custom-tools
 
+  env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/custom-tools
+
 server:
   ingress:
     enabled: false
+    
+  # Disable TLS for development  
+  extraArgs:
+    - --insecure
   #   controller: generic # Giữ là 'generic' để tương thích tốt nhất
     
   #   # Dùng đúng khóa `hostname`

@@ -8,6 +8,8 @@ env/
 venv/
 ENV/
 .env
+.env.secrets
+.env.local
 
 data/
 reports/

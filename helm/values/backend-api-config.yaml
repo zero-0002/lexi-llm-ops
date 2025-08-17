@@ -1,0 +1,79 @@
+# 🔧 System Configuration for Backend API
+# ======================================
+
+# Application Configuration
+app:
+  name: "Legal Retrieval System"
+  version: "1.0.0"
+  debug: true
+  logLevel: "INFO"
+
+# Database Configuration (non-secret)
+mongodb:
+  database: "legaldb"
+  user: "legal_user"
+  host: "legal-mongodb.data-service.svc.cluster.local"
+  port: 27017
+  
+redis:
+  host: "legal-redis-master.data-service.svc.cluster.local"
+  port: 6379
+  dbCelery: 0
+  dbCache: 1
+  dbSessions: 2
+
+# Qdrant Configuration
+qdrant:
+  host: "legal-qdrant.data-service.svc.cluster.local"
+  port: 6333
+  collectionName: "legal_documents"
+  vectorSize: 1536
+
+# OpenAI Configuration (non-secret)
+openai:
+  model: "gpt-3.5-turbo"
+  embeddingModel: "text-embedding-ada-002"
+
+# Celery Configuration
+celery:
+  taskSerializer: "json"
+  resultSerializer: "json"
+  acceptContent: "application/json"
+  timezone: "Asia/Ho_Chi_Minh"
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  timeout: 300
+
+# Security Configuration (non-secret)
+security:
+  corsOrigins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+    - "http://127.0.0.1:3000"
+  allowedHosts:
+    - "localhost"
+    - "127.0.0.1"
+    - "0.0.0.0"
+
+# Performance Configuration
+performance:
+  workerMemoryLimit: "512MB"
+  workerTimeout: 300
+  maxConcurrentTasks: 10
+  embeddingBatchSize: 100
+
+# Monitoring Configuration
+monitoring:
+  flowerPort: 5555
+  flowerUrlPrefix: "/flower"
+  enableMetrics: true
+
+# Development Configuration
+development:
+  reload: true
+  hotReload: true
+  autoRestart: true
