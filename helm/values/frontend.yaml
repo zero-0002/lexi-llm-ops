@@ -188,17 +188,16 @@ readinessProbe:
   failureThreshold: 3
   successThreshold: 1
 
-# Security context
+# Security context - container level
 securityContext:
-  runAsNonRoot: true
-  runAsUser: 101
-  runAsGroup: 101
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
+  runAsNonRoot: true
   capabilities:
     drop:
       - ALL
 
+# Security context - pod level  
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 101
