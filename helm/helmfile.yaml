@@ -11,10 +11,13 @@ repositories:
   - name: grafana
     url: https://grafana.github.io/helm-charts
 
+  - name: external-secrets
+    url: https://charts.external-secrets.io
+
 releases:
 #### External Secrets Setup
   - name: setup-secrets
-    namespace: secrets-store
+    namespace: secrets-management
     chart: ./charts/setup-secrets
     values:
       - values/setup-secrets.yaml
