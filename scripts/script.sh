@@ -19,6 +19,11 @@ kubectl get namespace argocd -o json > ns.json
     "kubernetes"
   ]
 }
+
+# tắt sync
+kubectl patch application setup-secrets -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+kubectl delete namespace secrets-management --force --grace-period=0
+#
 kubectl proxy
 curl -k -H "Content-Type: application/json" -X PUT --data-binary @ns.json \
 http://127.0.0.1:8002/api/v1/namespaces/argocd/finalize

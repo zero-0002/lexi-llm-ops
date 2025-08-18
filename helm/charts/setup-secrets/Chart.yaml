@@ -1,8 +1,8 @@
 apiVersion: v2
 name: setup-secrets
-description: Simple secrets setup for Legal Retrieval System
+description: External Secrets configuration for Legal Retrieval System (SecretStore + ExternalSecrets only)
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
 
-# Không cần dependencies - chỉ tạo secrets trực tiếp
+# No dependencies - External Secrets operator installed separately

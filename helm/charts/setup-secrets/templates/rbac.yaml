@@ -1,0 +1,54 @@
+# ServiceAccount cho External Secrets trong application namespace
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secrets-sa
+  namespace: {{ .Values.secretStore.namespace }}
+  labels:
+    {{- include "setup-secrets.labels" . | nindent 4 }}
+    app.kubernetes.io/component: external-secrets-rbac
+---
+# ClusterRole với toàn quyền đọc secrets across toàn cluster  
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-secrets-reader
+  labels:
+    {{- include "setup-secrets.labels" . | nindent 4 }}
+    app.kubernetes.io/component: external-secrets-rbac
+rules:
+# Toàn quyền đọc secrets trong tất cả namespaces
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+  resourceNames: []  # Tất cả secrets
+# Toàn quyền đọc configmaps trong tất cả namespaces  
+- apiGroups: [""]
+  resources: ["configmaps"] 
+  verbs: ["get", "list", "watch"]
+  resourceNames: []  # Tất cả configmaps
+# Quyền đọc namespaces để discovery
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+# Quyền đọc pods và services để troubleshoot
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+---  
+# ClusterRoleBinding để cấp quyền
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: external-secrets-binding
+  labels:
+    {{- include "setup-secrets.labels" . | nindent 4 }}
+    app.kubernetes.io/component: external-secrets-rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-secrets-reader
+subjects:
+- kind: ServiceAccount
+  name: external-secrets-sa
+  namespace: {{ .Values.secretStore.namespace }}
