@@ -154,8 +154,8 @@ mongodb:
   password: ""
 
 redis:
-  url: "redis://legal-redis-master.data-service.svc.cluster.local:6379"
-  host: "legal-redis-master.data-service.svc.cluster.local"
+  url: "redis://10.96.109.108:6379"
+  host: "10.96.109.108"
   port: "6379"
   password: ""
 
