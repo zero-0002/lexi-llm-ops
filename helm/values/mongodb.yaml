@@ -1,11 +1,16 @@
-# MongoDB - SIMPLE Configuration for Development Testing
-# ====================================================
+# MongoDB - Simple Bitnami Configuration (Docker-Compose Style)
+# =============================================================
 
-# Disable auth cho simple testing (no password needed)
+# Keep Bitnami image (required for Bitnami chart)
+# image defaults to bitnami/mongodb
+
+# Simple auth like docker-compose
 auth:
-  enabled: false
+  enabled: true
+  rootUser: root
+  rootPassword: password123
   
-# Use standalone architecture
+# Use standalone architecture  
 architecture: standalone
 
 # Disable persistence for testing (in-memory)
@@ -17,16 +22,30 @@ service:
   type: ClusterIP
   port: 27017
 
-# Minimal resources để tránh resource issues
+# Minimal resources
 resources:
   requests:
-    memory: "128Mi"
+    memory: "256Mi"
     cpu: "100m"
   limits:
-    memory: "256Mi" 
+    memory: "512Mi" 
     cpu: "200m"
 
-# Disable tất cả complex features
+# Disable security contexts that cause permission issues
+podSecurityContext:
+  enabled: false
+  
+containerSecurityContext:
+  enabled: false
+
+# Disable readiness/liveness probes that cause issues
+livenessProbe:
+  enabled: false
+  
+readinessProbe:
+  enabled: false
+
+# Disable complex features
 metrics:
   enabled: false
   serviceMonitor:
@@ -35,16 +54,18 @@ metrics:
 replicaSet:
   enabled: false
 
-# Simple security context
-podSecurityContext:
+# Simple init script for legaldb
+initdbScripts:
+  01-init.js: |
+    db = db.getSiblingDB('legaldb');
+    db.createCollection('conversations');
+    db.createCollection('documents');
+    print('Legal database initialized successfully');
+
+# Disable arbiter
+arbiter:
   enabled: false
 
-# No custom configuration
-configuration: ""
-
-# No init scripts để tránh lỗi
-initdbScripts: {}
-
-# Arbiter (disabled)
-arbiter:
+# Disable network policy if causing issues  
+networkPolicy:
   enabled: false
