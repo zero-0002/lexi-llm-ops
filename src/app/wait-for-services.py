@@ -12,27 +12,53 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def wait_for_tcp_service(host: str, port: int, timeout: int = 60) -> bool:
-    """Wait for TCP service to be available"""
+def wait_for_tcp_service(host: str, port: int, timeout: int = 120) -> bool:
+    """Wait for TCP service to be available with DNS fallback"""
     logger.info(f"⏳ Waiting for {host}:{port}...")
     start_time = time.time()
     
+    # Try to resolve hostname first for fallback
+    resolved_ip = None
+    try:
+        resolved_ip = socket.gethostbyname(host)
+        logger.info(f"🔍 DNS resolved {host} -> {resolved_ip}")
+    except socket.gaierror as e:
+        logger.warning(f"⚠️ DNS resolution failed for {host}: {e}")
+    
     while time.time() - start_time < timeout:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(5)
-            result = sock.connect_ex((host, port))
-            sock.close()
+        # Strategy 1: Try with original hostname (DNS)
+        if _try_connection(host, port, "hostname"):
+            logger.info(f"✅ {host}:{port} is ready!")
+            return True
             
-            if result == 0:
-                logger.info(f"✅ {host}:{port} is ready!")
-                return True
-        except Exception as e:
-            logger.debug(f"Connection attempt failed: {e}")
+        # Strategy 2: Try with resolved IP (fallback)
+        if resolved_ip and _try_connection(resolved_ip, port, "IP fallback"):
+            logger.info(f"✅ {host}:{port} is ready via IP fallback!")
+            return True
         
-        time.sleep(2)
+        time.sleep(3)  # Longer delay between attempts
     
     logger.error(f"❌ Timeout waiting for {host}:{port}")
+    return False
+
+def _try_connection(host: str, port: int, strategy: str) -> bool:
+    """Try single connection attempt"""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(15)  # Increased timeout for K8s environments
+        result = sock.connect_ex((host, port))
+        sock.close()
+        
+        if result == 0:
+            logger.debug(f"✅ Connection successful via {strategy}")
+            return True
+        else:
+            logger.debug(f"❌ Connection failed via {strategy}: error code {result}")
+    except socket.gaierror as e:
+        logger.debug(f"❌ DNS error via {strategy}: {e}")
+    except Exception as e:
+        logger.debug(f"❌ Connection error via {strategy}: {e}")
+    
     return False
 
 def parse_redis_url(url: str) -> tuple:

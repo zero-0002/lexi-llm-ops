@@ -1,29 +1,28 @@
-# Link Extract Worker Configuration
-# =================================
+# Values for celery worker - link type
+# This worker handles link analysis and extraction tasks
 
 workerType: link
-replicaCount: 1
 
 image:
-  repository: legal-retrieval/backend
-  tag: "latest"
+  repository: legal-chatbot-backend
+  tag: dns-fix-v1
   pullPolicy: Never
 
 worker:
-  logLevel: "info"
-  pool: "threads"
+  name: "celery-worker-link"
   concurrency: 2
+  queues: "link_queue"
+  logLevel: "INFO"
 
 resources:
-  limits:
-    cpu: 500m
-    memory: 1Gi
   requests:
-    cpu: 250m
-    memory: 512Mi
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
 
 env:
-  APP_NAME: "Legal Link Extract Worker"
+  APP_NAME: "Legal Link Worker"
   WORKER_TYPE: "link"
-  CELERY_QUEUES: "link_extract_queue"
-  SERPER_API_KEY: "91d19679c0dac6b0447f7f49b8c0d1b56c9e1e01"
+  CELERY_QUEUES: "link_queue"

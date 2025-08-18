@@ -1,26 +1,26 @@
-# RAG Worker Configuration
-# ========================
+# Values for celery worker - rag type
+# This worker handles RAG (Retrieval Augmented Generation) tasks
 
 workerType: rag
-replicaCount: 1
 
 image:
-  repository: legal-retrieval/backend
-  tag: "latest"
+  repository: legal-chatbot-backend
+  tag: dns-fix-v1
   pullPolicy: Never
 
 worker:
-  logLevel: "info"
-  pool: "threads"
+  name: "celery-worker-rag"
   concurrency: 2
+  queues: "rag_queue"
+  logLevel: "INFO"
 
 resources:
-  limits:
-    cpu: 1000m
-    memory: 2Gi
   requests:
-    cpu: 500m
-    memory: 1Gi
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "1000m"
 
 env:
   APP_NAME: "Legal RAG Worker"

@@ -61,14 +61,30 @@ celery_app.conf.update(
     broker_connection_retry=True,
     broker_connection_retry_on_startup=True,
     broker_connection_max_retries=20,
-    broker_connection_timeout=30,
+    broker_connection_timeout=60,  # Increased timeout
     
     # Redis connection pool settings
     broker_pool_limit=10,
-    redis_socket_timeout=30,
-    redis_socket_connect_timeout=30,
+    redis_socket_timeout=60,  # Increased timeout
+    redis_socket_connect_timeout=60,  # Increased timeout
     redis_retry_on_timeout=True,
     redis_health_check_interval=30,
+    
+    # Transport options for DNS timeout
+    broker_transport_options={
+        'socket_timeout': 60,
+        'socket_connect_timeout': 60,
+        'retry_on_timeout': True,
+        'health_check_interval': 30,
+    },
+    
+    # Result backend transport options
+    result_backend_transport_options={
+        'socket_timeout': 60,
+        'socket_connect_timeout': 60,
+        'retry_on_timeout': True,
+        'health_check_interval': 30,
+    },
     
     # Additional Redis settings for stability
     redis_max_connections=20,

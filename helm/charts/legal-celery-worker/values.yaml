@@ -2,8 +2,8 @@
 
 # Image configuration
 image:
-  repository: legal-retrieval/backend
-  tag: "latest"
+  repository: legal-chatbot-backend
+  tag: "dns-fix-v1"
   pullPolicy: Never
 
 # Deployment configuration
@@ -48,12 +48,11 @@ env:
   MONGODB_USERNAME: "legal_user"
   MONGO_URL: "mongodb://legal_user:$(MONGO_PASSWORD)@legal-mongodb.data-service.svc.cluster.local:27017/legal_retrieval"
   
-  # Redis connections
-  REDIS_HOST: "legal-redis.data-service.svc.cluster.local"
+  # Redis connections  
+  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
   REDIS_PORT: "6379"
   REDIS_DB: "0"
-  CELERY_BROKER_URL: "redis://:$(REDIS_PASSWORD)@legal-redis.data-service.svc.cluster.local:6379/0"
-  CELERY_RESULT_BACKEND: "redis://:$(REDIS_PASSWORD)@legal-redis.data-service.svc.cluster.local:6379/0"
+  # CELERY URLs loaded from legal-secrets
   
   # Vector database
   QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"

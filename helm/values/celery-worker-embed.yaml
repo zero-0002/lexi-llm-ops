@@ -4,8 +4,8 @@
 workerType: embed
 
 image:
-  repository: legal-retrieval/backend
-  tag: latest
+  repository: legal-chatbot-backend
+  tag: dns-fix-v1
   pullPolicy: Never
 
 worker:

@@ -100,12 +100,44 @@ def get_qdrant_url() -> str:
 
 # Celery configuration using Redis
 def get_celery_broker_url() -> str:
-    """Get Celery broker URL (Redis DB 3)"""
+    """Get Celery broker URL - prefer environment variable, fallback to Redis DB 3"""
+    broker_url = os.getenv('CELERY_BROKER_URL')
+    if broker_url:
+        return broker_url
     return get_redis_url(3)
 
 def get_celery_result_backend_url() -> str:
-    """Get Celery result backend URL (Redis DB 4)"""
+    """Get Celery result backend URL - prefer environment variable, fallback to Redis DB 4"""
+    result_backend = os.getenv('CELERY_RESULT_BACKEND')
+    if result_backend:
+        return result_backend
     return get_redis_url(4)
+
+def get_redis_url_with_fallback(db: int = 0) -> str:
+    """Get Redis URL with IP fallback for K8s environments"""
+    redis_host = settings.REDIS_HOST
+    redis_port = settings.REDIS_PORT
+    
+    # Try to resolve hostname and create IP-based URL as fallback
+    try:
+        import socket
+        resolved_ip = socket.gethostbyname(redis_host)
+        
+        # Log both hostname and IP options
+        hostname_url = f"redis://{redis_host}:{redis_port}/{db}" if not settings.REDIS_PASSWORD else f"redis://:{settings.REDIS_PASSWORD}@{redis_host}:{redis_port}/{db}"
+        ip_url = f"redis://{resolved_ip}:{redis_port}/{db}" if not settings.REDIS_PASSWORD else f"redis://:{settings.REDIS_PASSWORD}@{resolved_ip}:{redis_port}/{db}"
+        
+        print(f"Redis URLs - Hostname: {hostname_url}, IP: {ip_url}")
+        return hostname_url  # Prefer hostname, but IP is available for fallback
+        
+    except Exception:
+        # Fallback to original logic if resolution fails
+        pass
+    
+    if settings.REDIS_PASSWORD:
+        return f"redis://:{settings.REDIS_PASSWORD}@{redis_host}:{redis_port}/{db}"
+    else:
+        return f"redis://{redis_host}:{redis_port}/{db}"
 
 # Service discovery for Kubernetes
 def get_service_url(service_name: str, port: int = 80, namespace: str = "default") -> str:
