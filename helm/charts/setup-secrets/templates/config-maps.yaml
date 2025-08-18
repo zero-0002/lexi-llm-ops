@@ -1,0 +1,81 @@
+{{- if .Values.configMaps.enabled }}
+# ConfigMap template cho development environment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: application
+  labels:
+    app.kubernetes.io/name: backend-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: legal-retrieval
+data:
+  # Backend configuration
+  ENVIRONMENT: "{{ .Values.configMaps.backend.environment }}"
+  DEBUG: "{{ .Values.configMaps.backend.debug }}"
+  LOG_LEVEL: "{{ .Values.configMaps.backend.logLevel }}"
+  
+  # Database URLs (non-secret parts)
+  MONGODB_HOST: "mongodb.data-service.svc.cluster.local"
+  MONGODB_PORT: "27017"
+  MONGODB_DATABASE: "legal_retrieval"
+  
+  REDIS_HOST: "redis.data-service.svc.cluster.local"
+  REDIS_PORT: "6379"
+  
+  # Vector database
+  QDRANT_HOST: "qdrant.data-service.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  
+  # Application settings
+  MAX_WORKERS: "4"
+  TIMEOUT: "300"
+  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: application
+  labels:
+    app.kubernetes.io/name: frontend-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: legal-retrieval
+data:
+  # Frontend configuration
+  NODE_ENV: "{{ .Values.configMaps.frontend.nodeEnv }}"
+  REACT_APP_ENVIRONMENT: "{{ .Values.configMaps.frontend.nodeEnv }}"
+  REACT_APP_DEBUG: "{{ .Values.configMaps.backend.debug }}"
+  
+  # API endpoints (non-secret)
+  REACT_APP_WS_URL: "ws://legal-backend-api.application.svc.cluster.local:8000"
+  REACT_APP_UPLOAD_MAX_SIZE: "10485760"  # 10MB
+  
+  # UI settings
+  REACT_APP_THEME: "{{ .Values.configMaps.frontend.theme }}"
+  REACT_APP_LANGUAGE: "{{ .Values.configMaps.frontend.language }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: celery-config
+  namespace: application
+  labels:
+    app.kubernetes.io/name: celery-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: legal-retrieval
+data:
+  # Celery configuration
+  CELERY_WORKER_TYPE: "{{ .Values.configMaps.celery.workerType }}"
+  CELERY_LOG_LEVEL: "{{ .Values.configMaps.celery.logLevel }}"
+  CELERY_CONCURRENCY: "{{ .Values.configMaps.celery.concurrency }}"
+  CELERY_MAX_TASKS_PER_CHILD: "1000"
+  
+  # Task routing
+  CELERY_TASK_ROUTES: "tasks.embedding:embedding_queue,tasks.search:search_queue"
+  
+  # Performance settings
+  CELERY_PREFETCH_MULTIPLIER: "1"
+  CELERY_OPTIMIZE: "fair"
+{{- end }}

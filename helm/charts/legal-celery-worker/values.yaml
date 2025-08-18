@@ -35,7 +35,17 @@ env:
   # Application configuration
   APP_NAME: "Legal Celery Worker"
   DEBUG: "false"
-  
+
+# Environment variables from ConfigMaps and Secrets
+envFrom:
+  - secretRef:
+      name: legal-celery-worker-secret
+  - configMapRef:
+      name: celery-config
+      optional: true
+
+# Legacy database connections (overridden by secrets)
+legacyEnv:
   # Database connections (will be overridden in values)
   MONGO_URL: "mongodb://localhost:27017/legaldb"
   REDIS_URL: "redis://localhost:6379/0"

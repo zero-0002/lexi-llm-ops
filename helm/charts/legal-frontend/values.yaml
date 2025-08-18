@@ -39,10 +39,11 @@ env: {}
 
 # Environment variables from ConfigMaps and Secrets
 envFrom:
-  - configMapRef:
-      name: legal-frontend-config
   - secretRef:
       name: legal-frontend-secret
+  - configMapRef:
+      name: frontend-config
+      optional: true
 
 # Secrets (will be overridden by External Secrets)
 secrets: {}

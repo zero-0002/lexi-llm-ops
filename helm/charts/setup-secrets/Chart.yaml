@@ -1,12 +1,8 @@
 apiVersion: v2
 name: setup-secrets
-description: External Secrets configuration for Legal Retrieval System
+description: Simple secrets setup for Legal Retrieval System
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
 
-dependencies:
-  - name: external-secrets
-    version: 0.9.11
-    repository: https://charts.external-secrets.io
-    condition: external-secrets.enabled
+# Không cần dependencies - chỉ tạo secrets trực tiếp

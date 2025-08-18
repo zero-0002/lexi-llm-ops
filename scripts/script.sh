@@ -5,6 +5,7 @@ helmfile destroy
 # check secret
 kubectl get secret legal-backend-secret -n application -o yaml
 kubectl get secret legal-backend-secret -n application -o jsonpath="{.data.ENCRYPTION_KEY}" | base64 -d
+kubectl get clustersecretstore legal-secret-store -o yaml
 
 helmfile destroy --selector name=setup-secrets
 helmfile apply --selector name=setup-secrets
@@ -20,7 +21,7 @@ kubectl get namespace argocd -o json > ns.json
 }
 kubectl proxy
 curl -k -H "Content-Type: application/json" -X PUT --data-binary @ns.json \
-http://127.0.0.1:8001/api/v1/namespaces/argocd/finalize
+http://127.0.0.1:8002/api/v1/namespaces/argocd/finalize
 
 # remove application with helm
 for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do

@@ -59,10 +59,14 @@ spec:
               value: "{{ $value }}"
             {{- end }}
           envFrom:
+            {{- if .Values.envFrom }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- else }}
             - secretRef:
                 name: legal-celery-worker-secret
             - configMapRef:
                 name: {{ include "legal-celery-worker.fullname" . }}-config
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

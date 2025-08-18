@@ -69,6 +69,15 @@ env:
   HOT_RELOAD: "true"
 
 # Secrets will be injected via envFrom in deployment template
+envFrom:
+  - secretRef:
+      name: legal-backend-secret
+  - configMapRef:
+      name: backend-config
+      optional: true
+
+# Non-secret environment variables
+environment:
   QDRANT_URL: "http://legal-qdrant:6333"
 
 # Simple health check

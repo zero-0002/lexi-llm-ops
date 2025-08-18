@@ -49,10 +49,14 @@ spec:
               value: {{ .Values.worker.logLevel | quote }}
             {{- end }}
           envFrom:
+            {{- if .Values.envFrom }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- else }}
             - secretRef:
                 name: legal-backend-secret
             - configMapRef:
                 name: {{ include "legal-backend.fullname" . }}-config
+            {{- end }}
           {{- if eq .Values.component "api" }}
           {{- if .Values.healthCheck.enabled }}
           livenessProbe:

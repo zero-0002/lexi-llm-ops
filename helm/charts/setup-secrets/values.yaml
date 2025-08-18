@@ -1,121 +1,56 @@
-# External Secrets Operator configuration
-external-secrets:
-  enabled: true
-  installCRDs: true
-  
-  replicaCount: 2
-  
-  # Security context
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-      - ALL
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 65532
-    runAsGroup: 65532
-    
-  # Resource limits
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+# Simple setup-secrets chart for Legal Retrieval
+# Values được cập nhật từ .env file
 
-# Environment configuration (development, staging, production)
+# Environment configuration
 environment: development
-
-# Secret Store selection based on environment
-secretStore:
-  # Provider type: kubernetes, aws, azure, gcp
-  provider: kubernetes
-  
-  # Kubernetes provider config (for development)
-  kubernetes:
-    enabled: true
-    name: legal-secret-store
-    namespace: application
-    remoteNamespace: secrets-store  # Can be replaced with cloud provider
-    
-  # AWS Secrets Manager config (for production)  
-  aws:
-    enabled: false
-    name: aws-secret-store
-    region: us-west-2
-    
-  # Azure Key Vault config
-  azure:
-    enabled: false
-    name: azure-secret-store
-    vaultUrl: ""
-    
-  # Google Secret Manager config
-  gcp:
-    enabled: false
-    name: gcp-secret-store
-    projectId: ""
 
 # Namespaces
 namespaces:
-  # Secrets storage (replace with cloud provider in production)
-  secretsStore: secrets-store
-  # External Secrets Operator management
-  management: secrets-management
-  # Application namespace  
   application: application
 
-# Base secrets configuration (for development environment)
+# Base secrets configuration từ .env file
 baseSecrets:
   enabled: true
   
   mongodb:
-    username: legaluser
-    password: legal-mongo-dev-password-123
+    username: legal_user
+    password: "legal_password"
     
   redis:
-    password: legal-redis-dev-password-123
+    password: "legal-redis-dev-password-123"
     
   openai:
-    apiKey: sk-your-openai-api-key-here-replace-in-production
-    
+    apiKey: "test_api_key"
   auth:
-    jwtSecret: legal-jwt-super-secret-key-development-only
-    secretKey: legal-app-secret-key-development-change-in-prod
-    encryptionKey: legal-32-char-encryption-dev-key-12
+    jwtSecret: "legal-jwt-super-secret-key-development"
+    secretKey: "dev_secret_key_change_in_production"
+    encryptionKey: "legal-32-char-encryption-dev-key"
     
   frontend:
-    apiBaseUrl: http://legal-backend-api.application.svc.cluster.local:8000
+    apiBaseUrl: "http://legal-backend-api.application.svc.cluster.local:8000"
     
   analytics:
-    gaTrackingId: GA-DEVELOPMENT-ID
+    gaTrackingId: "GA-DEVELOPMENT-ID"
     enableAnalytics: false
 
-# External Secret configurations
-externalSecrets:
+# ConfigMaps configuration
+configMaps:
+  enabled: true
+  
+  # Backend configuration
   backend:
-    enabled: true
-    name: legal-backend-external-secret
-    namespace: application
+    environment: "development"
+    debug: true
+    logLevel: "DEBUG"
     
+  # Frontend configuration  
   frontend:
-    enabled: true
-    name: legal-frontend-external-secret
-    namespace: application
+    nodeEnv: "development"
+    theme: "light"
+    language: "vi"
     
-  celeryWorker:
-    enabled: true
-    name: legal-celery-worker-external-secret
-    namespace: application
-
-# RBAC configuration
-rbac:
-  create: true        # tạo ClusterRole/ClusterRoleBinding hoặc Role/RoleBinding
-  clusterRole: true   # nếu muốn cấp quyền cluster-wide (có thể đọc secrets nhiều namespace)
-
-serviceAccount:
-  create: true
-  name: external-secrets-sa
-  annotations: {}
+  # Celery configuration
+  celery:
+    workerType: "general"
+    logLevel: "INFO"
+    concurrency: 2

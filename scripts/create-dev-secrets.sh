@@ -8,10 +8,10 @@ echo "================================================="
 # Create secrets-store namespace
 kubectl create namespace secrets-store --dry-run=client -o yaml | kubectl apply -f -
 
-# Check if .env.secrets file exists
-if [ ! -f "../.env.secrets" ]; then
-  echo "⚠️  .env.secrets file not found. Creating sample file..."
-  cat > ../.env.secrets << 'EOF'
+# Check if .env file exists
+if [ ! -f "../.env" ]; then
+  echo "⚠️  .env file not found. Creating sample file..."
+  cat > ../.env << 'EOF'
 # 🔐 SECRETS ONLY - Never commit to git
 # ====================================
 
