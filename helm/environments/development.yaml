@@ -4,23 +4,6 @@
 version: "dev-latest"
 storageClass: "default"
 
-# 🔑 Global secrets configuration
-secrets:
-  # Reference to setup-secrets chart
-  setupSecretsEnabled: true
-  namespace: "application"
-  
-  # Secret names created by setup-secrets
-  backendSecretName: "legal-backend-secret"
-  frontendSecretName: "legal-frontend-secret"
-  celerySecretName: "legal-celery-worker-secret"
-
-# Global envFrom configuration
-globalEnvFrom:
-  - secretRef:
-      name: "legal-backend-secret"
-      optional: false
-
 # Development-specific settings
 debug: true
 logLevel: "DEBUG"
@@ -38,17 +21,6 @@ mongodb:
     requests:
       memory: "256Mi"
       cpu: "100m"
-  
-  # 🔑 MongoDB authentication from secrets
-  auth:
-    enabled: true
-    existingSecret: "legal-backend-secret"
-    usernames: ["legal_user"]
-  
-  # Additional environment for MongoDB
-  extraEnv:
-    - name: MONGO_INITDB_ROOT_USERNAME
-      value: "root"
 
 redis:
   persistence:
@@ -57,17 +29,6 @@ redis:
     requests:
       memory: "128Mi"
       cpu: "50m"
-  
-  # 🔑 Redis authentication from secrets
-  auth:
-    enabled: true
-    existingSecret: "legal-backend-secret"
-    existingSecretPasswordKey: "REDIS_PASSWORD"
-  
-  # Additional environment for Redis
-  extraEnv:
-    - name: REDIS_LOG_LEVEL
-      value: "notice"
 
 qdrant:
   persistence:
@@ -87,24 +48,6 @@ backend:
     limits:
       memory: "1Gi"
       cpu: "500m"
-  
-  # 🔑 Load secrets using envFrom
-  envFrom:
-    - secretRef:
-        name: legal-backend-secret
-  
-  # Additional environment variables if needed
-  extraEnvFrom:
-    - configMapRef:
-        name: backend-config
-        optional: true
-  
-  # Individual env vars if needed
-  extraEnv:
-    - name: ENVIRONMENT
-      value: "development"
-    - name: DEBUG
-      value: "true"
 
 celery:
   replicaCount: 1
@@ -116,26 +59,6 @@ celery:
     limits:
       memory: "2Gi"
       cpu: "1000m"
-  
-  # 🔑 Load secrets using envFrom
-  envFrom:
-    - secretRef:
-        name: legal-celery-worker-secret
-  
-  # Additional environment variables if needed
-  extraEnvFrom:
-    - configMapRef:
-        name: celery-config
-        optional: true
-  
-  # Individual env vars for celery worker
-  extraEnv:
-    - name: CELERY_WORKER_TYPE
-      value: "general"
-    - name: CELERY_LOG_LEVEL
-      value: "INFO"
-    - name: CELERY_CONCURRENCY
-      value: "2"
 
 frontend:
   replicaCount: 1
@@ -146,26 +69,6 @@ frontend:
     limits:
       memory: "256Mi"
       cpu: "200m"
-  
-  # 🔑 Load secrets using envFrom
-  envFrom:
-    - secretRef:
-        name: legal-frontend-secret
-  
-  # Additional environment variables if needed
-  extraEnvFrom:
-    - configMapRef:
-        name: frontend-config
-        optional: true
-  
-  # Individual env vars for frontend
-  extraEnv:
-    - name: NODE_ENV
-      value: "development"
-    - name: REACT_APP_ENVIRONMENT
-      value: "development"
-    - name: REACT_APP_DEBUG
-      value: "true"
 
 # Development features
 features:

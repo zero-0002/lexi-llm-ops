@@ -33,6 +33,7 @@ spec:
               containerPort: {{ .Values.env.PORT | default 8000 }}
               protocol: TCP
           {{- end }}
+          # Non-secret environment variables từ values.yaml
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -48,14 +49,15 @@ spec:
             - name: CELERY_LOG_LEVEL
               value: {{ .Values.worker.logLevel | quote }}
             {{- end }}
+          
+          # Sensitive environment variables từ secrets
           envFrom:
+            {{- if .Values.secrets.enabled }}
+            - secretRef:
+                name: {{ .Values.secrets.secretName }}
+            {{- end }}
             {{- if .Values.envFrom }}
             {{- toYaml .Values.envFrom | nindent 12 }}
-            {{- else }}
-            - secretRef:
-                name: legal-backend-secret
-            - configMapRef:
-                name: {{ include "legal-backend.fullname" . }}-config
             {{- end }}
           {{- if eq .Values.component "api" }}
           {{- if .Values.healthCheck.enabled }}

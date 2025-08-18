@@ -1,92 +1,72 @@
 #!/bin/bash
-# 🔧 Simple Secret Creation from .env.secrets file
-# ================================================
+# 🔐 Create ONLY sensitive secrets - Clean approach
+# =================================================
+# Chỉ tạo sensitive data, non-secret env sẽ đặt trong chart values
 
-echo "🔐 Creating Development Secrets from .env.secrets"
-echo "================================================="
+set -euo pipefail
 
-# Create secrets-store namespace
-kubectl create namespace secrets-store --dry-run=client -o yaml | kubectl apply -f -
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-# Check if .env file exists
-if [ ! -f "../.env" ]; then
-  echo "⚠️  .env file not found. Creating sample file..."
-  cat > ../.env << 'EOF'
-# 🔐 SECRETS ONLY - Never commit to git
-# ====================================
+NAMESPACE_APP="application"
 
-# Database Secrets
-MONGODB_PASSWORD=legal-mongo-dev-password-123
-REDIS_PASSWORD=legal-redis-dev-password-123
+echo -e "${BLUE}🔐 Creating ONLY sensitive secrets${NC}"
+echo -e "${BLUE}=================================${NC}"
+echo ""
+echo -e "${YELLOW}📋 Strategy: Tách biệt secrets vs config${NC}"
+echo "   🔐 Sensitive data → Kubernetes Secrets (script này)"
+echo "   📦 Non-secret config → Chart values.yaml"
+echo ""
 
-# API Keys
-OPENAI_API_KEY=sk-your-openai-api-key-here
-SERPER_API_KEY=your-serper-api-key-here
-
-# Security Secrets
-SECRET_KEY=legal-app-secret-key-development
-JWT_SECRET=legal-jwt-super-secret-key-development
-ENCRYPTION_KEY=legal-32-char-encryption-dev-key
-EOF
-  echo "✅ Sample .env file created. Please update with your values."
-  echo "⚠️  Make sure to add .env.secrets to .gitignore!"
+# Load .env if exists
+if [ -f ".env" ]; then
+    echo "📄 Loading .env..."
+    set -a
+    source .env
+    set +a
+    echo -e "${GREEN}✅ .env loaded${NC}"
+else
+    echo -e "${YELLOW}⚠️  .env not found, using dev defaults${NC}"
 fi
 
-# Load .env file
-set -a
-source ../.env
-set +a
+# Create namespace
+echo -e "${YELLOW}🏗️  Creating namespace...${NC}"
+kubectl create namespace $NAMESPACE_APP --dry-run=client -o yaml | kubectl apply -f -
+echo -e "${GREEN}✅ Namespace: $NAMESPACE_APP${NC}"
 
-echo "📦 Creating secrets from .env  ..."
+echo ""
+echo -e "${YELLOW}🔐 Creating sensitive secrets...${NC}"
 
-# MongoDB credentials
-kubectl create secret generic mongodb-credentials \
-  --from-literal=username="legal_user" \
-  --from-literal=password="${MONGODB_PASSWORD}" \
-  -n secrets-store \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# Redis credentials  
-kubectl create secret generic redis-credentials \
-  --from-literal=password="${REDIS_PASSWORD:-}" \
-  -n secrets-store \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# OpenAI credentials
-kubectl create secret generic openai-credentials \
-  --from-literal=api_key="${OPENAI_API_KEY}" \
-  -n secrets-store \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# SERPER credentials
-kubectl create secret generic serper-credentials \
-  --from-literal=api_key="${SERPER_API_KEY}" \
-  -n secrets-store \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# Auth secrets
-kubectl create secret generic auth-secrets \
-  --from-literal=jwt_secret="${JWT_SECRET}" \
-  --from-literal=secret_key="${SECRET_KEY}" \
-  --from-literal=encryption_key="${ENCRYPTION_KEY}" \
-  -n secrets-store \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# System configuration (from .env.config)
-if [ -f "../.env.config" ]; then
-  # Frontend config (non-secret URLs)
-  kubectl create secret generic frontend-config \
-    --from-literal=api_base_url="http://legal-backend-api.application.svc.cluster.local:8000" \
-    --from-literal=ws_url="ws://legal-backend-api.application.svc.cluster.local:8000" \
-    -n secrets-store \
+# Single shared secret containing all sensitive data
+kubectl create secret generic legal-secrets \
+    --from-literal=MONGO_PASSWORD="${MONGO_PASSWORD:-mongodb-dev-pass}" \
+    --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD:-redis-dev-pass}" \
+    --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY:-sk-fake-key-for-development}" \
+    --from-literal=JWT_SECRET="${JWT_SECRET:-jwt-dev-secret-key}" \
+    --from-literal=SECRET_KEY="${SECRET_KEY:-django-dev-secret-key}" \
+    --from-literal=NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-nextauth-dev-secret}" \
+    --from-literal=SENTRY_DSN="${SENTRY_DSN:-}" \
+    -n $NAMESPACE_APP \
     --dry-run=client -o yaml | kubectl apply -f -
-fi
+
+echo -e "${GREEN}✅ Secret created: legal-secrets${NC}"
+
+# Verification
+echo ""
+echo -e "${BLUE}🔍 Verification:${NC}"
+echo "📊 Secret keys:"
+kubectl get secret legal-secrets -n $NAMESPACE_APP -o jsonpath='{.data}' | jq -r 'keys[]' | sed 's/^/  - /'
 
 echo ""
-echo "✅ Development secrets created from .env.secrets!"
-echo ""
-echo "🔍 Verifying created secrets:"
-kubectl get secrets -n secrets-store
+echo -e "${BLUE}📋 Usage trong Helm charts:${NC}"
+echo "envFrom:"
+echo "  - secretRef:"
+echo "      name: legal-secrets"
 
 echo ""
-echo "📝 Note: System configuration should be managed via Helm values files"
+echo -e "${GREEN}🎊 Sensitive secrets ready!${NC}"
+echo -e "${YELLOW}📝 Next: Đặt non-secret envs vào chart values.yaml${NC}"

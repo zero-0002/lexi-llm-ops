@@ -34,19 +34,41 @@ config:
   language: "vi"
   maxChatHistory: "100"
 
-# Environment variables
-env: {}
+# Environment variables (NON-SECRET only, secrets từ legal-secrets secret)
+env:
+  # Next.js settings
+  NODE_ENV: "development"
+  NEXT_PUBLIC_ENV: "development"
+  
+  # API endpoints
+  NEXT_PUBLIC_API_URL: "http://legal-backend-api.application.svc.cluster.local:8000"
+  NEXT_PUBLIC_WS_URL: "ws://legal-backend-api.application.svc.cluster.local:8000/ws"
+  
+  # NextAuth configuration (non-secret part)
+  NEXTAUTH_URL: "http://localhost:3000"
+  
+  # Feature flags
+  NEXT_PUBLIC_ENABLE_ANALYTICS: "false"
+  NEXT_PUBLIC_ENABLE_CHAT: "true"
+  NEXT_PUBLIC_ENABLE_UPLOAD: "true"
+  
+  # UI settings
+  NEXT_PUBLIC_APP_NAME: "Legal Retrieval System"
+  NEXT_PUBLIC_APP_VERSION: "1.0.0"
+  NEXT_PUBLIC_THEME: "light"
+  NEXT_PUBLIC_LANGUAGE: "vi"
 
 # Environment variables from ConfigMaps and Secrets
 envFrom:
+  # Sensitive data từ shared secret
   - secretRef:
-      name: legal-frontend-secret
-  - configMapRef:
-      name: frontend-config
-      optional: true
+      name: legal-secrets
 
-# Secrets (will be overridden by External Secrets)
-secrets: {}
+# Secrets configuration
+secrets:
+  enabled: true
+  secretName: "legal-secrets"  # Single shared secret với sensitive data
+  createSecret: false  # Disable creating individual secret, use shared secret instead
 
 # Resource configuration
 resources:
@@ -64,8 +86,22 @@ autoscaling:
 # Health check configuration
 healthCheck:
   enabled: true
+  path: "/"
   initialDelaySeconds: 10
   periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# Readiness probe configuration
+readinessProbe:
+  enabled: true
+  path: "/"
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
 
 # Security context - container level
 securityContext:

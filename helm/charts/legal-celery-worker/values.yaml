@@ -24,25 +24,52 @@ worker:
   prefetchMultiplier: 1
   pool: "eventlet"
 
-# Environment variables
+# Environment variables (NON-SECRET only, secrets từ legal-secrets secret)
 env:
+  # Application settings
+  APP_NAME: "Legal Celery Worker"
+  ENVIRONMENT: "development"
+  DEBUG: "false"
+  LOG_LEVEL: "INFO"
+  
   # Celery configuration
   CELERY_WORKER_TYPE: "rag"
   CELERY_QUEUES: "rag_queue,embed_queue"
   CELERY_CONCURRENCY: "2"
   CELERY_LOG_LEVEL: "INFO"
+  CELERY_MAX_TASKS_PER_CHILD: "1000"
+  CELERY_PREFETCH_MULTIPLIER: "1"
+  CELERY_POOL: "eventlet"
   
-  # Application configuration
-  APP_NAME: "Legal Celery Worker"
-  DEBUG: "false"
+  # Database connections (non-secret parts)
+  MONGODB_HOST: "legal-mongodb.data-service.svc.cluster.local"
+  MONGODB_PORT: "27017"
+  MONGODB_DATABASE: "legal_retrieval"
+  MONGODB_USERNAME: "legal_user"
+  MONGO_URL: "mongodb://legal_user:$(MONGO_PASSWORD)@legal-mongodb.data-service.svc.cluster.local:27017/legal_retrieval"
+  
+  # Redis connections
+  REDIS_HOST: "legal-redis.data-service.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  CELERY_BROKER_URL: "redis://:$(REDIS_PASSWORD)@legal-redis.data-service.svc.cluster.local:6379/0"
+  CELERY_RESULT_BACKEND: "redis://:$(REDIS_PASSWORD)@legal-redis.data-service.svc.cluster.local:6379/0"
+  
+  # Vector database
+  QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  QDRANT_URL: "http://legal-qdrant.data-service.svc.cluster.local:6333"
 
 # Environment variables from ConfigMaps and Secrets
 envFrom:
+  # Sensitive data từ shared secret
   - secretRef:
-      name: legal-celery-worker-secret
-  - configMapRef:
-      name: celery-config
-      optional: true
+      name: legal-secrets
+
+# Secrets configuration
+secrets:
+  enabled: true
+  secretName: "legal-secrets"  # Single shared secret với sensitive data
 
 # Legacy database connections (overridden by secrets)
 legacyEnv:
