@@ -1,72 +1,49 @@
-# MongoDB - Simplified Configuration (Production-like)
-# ==================================================
+# MongoDB - SIMPLE Configuration for Development Testing
+# ====================================================
 
+# Disable auth cho simple testing (no password needed)
 auth:
-  enabled: true
-  rootUser: "admin"
-  rootPassword: "password123"
-
+  enabled: false
+  
+# Use standalone architecture
 architecture: standalone
 
-# Persistence
+# Disable persistence for testing (in-memory)
 persistence:
-  enabled: true
-  size: 10Gi
-  storageClass: "standard"
-  accessModes:
-    - ReadWriteOnce
+  enabled: false
 
-# Service configuration
+# Simple service
 service:
   type: ClusterIP
   port: 27017
-  portName: mongodb
 
-# Resource limits
+# Minimal resources để tránh resource issues
 resources:
   requests:
-    memory: "512Mi"
-    cpu: "250m"
+    memory: "128Mi"
+    cpu: "100m"
   limits:
-    memory: "1Gi"
-    cpu: "500m"
+    memory: "256Mi" 
+    cpu: "200m"
 
-# Metrics and monitoring
+# Disable tất cả complex features
 metrics:
   enabled: false
   serviceMonitor:
     enabled: false
 
-# Security context
-podSecurityContext:
-  enabled: true
-  fsGroup: 1001
-  runAsUser: 1001
-
-# MongoDB configuration
-configuration: |
-  # Custom MongoDB configuration
-  # storage:
-  #   dbPath: /opt/bitnami/mongodb/data/db
-  # net:
-  #   port: 27017
-  #   bindIpAll: true
-
-# Initialize database
-initdbScripts:
-  setup.js: |
-    // Initialize legal database
-    db = db.getSiblingDB('legaldb');
-    db.createCollection('conversations');
-    db.createCollection('documents');
-    db.conversations.createIndex({ "conversation_id": 1 }, { unique: true });
-    db.conversations.createIndex({ "created_at": 1 });
-    db.documents.createIndex({ "document_id": 1 }, { unique: true });
-    print('Legal database initialized successfully');
-
-# Replica set (disabled for development)
 replicaSet:
   enabled: false
+
+# Simple security context
+podSecurityContext:
+  enabled: false
+
+# No custom configuration
+configuration: ""
+
+# No init scripts để tránh lỗi
+initdbScripts: {}
 
 # Arbiter (disabled)
 arbiter:

@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: legal-celery-worker-rag
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: legal-celery-worker-rag
+    app.kubernetes.io/part-of: legal-retrieval
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-username/Legal-Retrieval
+    targetRevision: HEAD
+    path: helm
+    plugin:
+      name: helmfile
+      env:
+        - name: HELM_SELECTOR
+          value: "app=legal-celery-worker-rag"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: application
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

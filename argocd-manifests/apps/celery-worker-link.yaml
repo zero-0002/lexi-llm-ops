@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: legal-celery-worker-link
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: legal-celery-worker-link
+    app.kubernetes.io/part-of: legal-retrieval
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tinhnguyen0110/LexiOps
+    targetRevision: HEAD
+    path: helm
+    plugin:
+      name: helmfile
+      env:
+        - name: HELM_SELECTOR
+          value: "app=legal-celery-worker-link"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: application
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

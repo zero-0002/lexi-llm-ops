@@ -43,7 +43,7 @@ echo -e "${YELLOW}🔐 Creating sensitive secrets...${NC}"
 
 # Single shared secret containing all sensitive data
 kubectl create secret generic legal-secrets \
-    --from-literal=MONGO_PASSWORD="${MONGO_PASSWORD:-mongodb-dev-pass}" \
+    --from-literal=MONGO_PASSWORD="${MONGODB_PASSWORD:-mongodb-dev-pass}" \
     --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD:-redis-dev-pass}" \
     --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY:-sk-fake-key-for-development}" \
     --from-literal=JWT_SECRET="${JWT_SECRET:-jwt-dev-secret-key}" \
