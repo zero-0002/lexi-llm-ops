@@ -44,16 +44,6 @@ spec:
               value: "true"
             - name: LOG_LEVEL
               value: "INFO"
-            - name: MONGO_URI
-              value: "mongodb://admin:password123@legal-mongodb.data-service.svc.cluster.local:27017/legal_chatbot_db?authSource=admin"
-            - name: QDRANT_URL
-              value: "http://legal-qdrant.data-service.svc.cluster.local:6333"
-            - name: REDIS_URL
-              value: "redis://legal-redis-master.data-service.svc.cluster.local:6379/0"
-            - name: CELERY_BROKER_URL
-              value: "redis://legal-redis-master.data-service.svc.cluster.local:6379/3"
-            - name: CELERY_RESULT_BACKEND
-              value: "redis://legal-redis-master.data-service.svc.cluster.local:6379/4"
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
@@ -63,9 +53,10 @@ spec:
             {{- toYaml .Values.envFrom | nindent 12 }}
             {{- else }}
             - secretRef:
-                name: legal-celery-worker-secret
+                name: legal-secrets
             - configMapRef:
                 name: {{ include "legal-celery-worker.fullname" . }}-config
+                optional: true
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

@@ -6,7 +6,7 @@ workerType: retrieval
 image:
   repository: legal-retrieval/backend
   tag: latest
-  pullPolicy: Always
+  pullPolicy: Never
 
 worker:
   name: "celery-worker-retrieval"

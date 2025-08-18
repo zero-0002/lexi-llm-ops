@@ -71,7 +71,7 @@ env:
 # Secrets will be injected via envFrom in deployment template
 envFrom:
   - secretRef:
-      name: legal-backend-secret
+      name: legal-secrets
   - configMapRef:
       name: backend-config
       optional: true

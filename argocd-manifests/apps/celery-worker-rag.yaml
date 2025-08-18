@@ -11,7 +11,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-username/Legal-Retrieval
+    repoURL: https://github.com/tinhnguyen0110/LexiOps
     targetRevision: HEAD
     path: helm
     plugin:
