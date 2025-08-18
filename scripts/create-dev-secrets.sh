@@ -49,8 +49,8 @@ kubectl create secret generic legal-secrets \
     --from-literal=MONGO_DATABASE="${MONGO_DATABASE:-legaldb}" \
     --from-literal=MONGO_AUTH_SOURCE="${MONGO_AUTH_SOURCE:-admin}" \
     --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD:-}" \
-    --from-literal=CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://legal-redis-master.data-service.svc.cluster.local:6379/0}" \
-    --from-literal=CELERY_RESULT_BACKEND="${CELERY_RESULT_BACKEND:-redis://legal-redis-master.data-service.svc.cluster.local:6379/0}" \
+    --from-literal=CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://10.96.109.108:6379/0}" \
+    --from-literal=CELERY_RESULT_BACKEND="${CELERY_RESULT_BACKEND:-redis://10.96.109.108:6379/0}" \
     --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY:-sk-proj-ea1CMoMwRh41b3E_TTo4iHhEKQdkFV3Td-PwAo_uRWb3xDfzaqS2E79pvqLlnXP_IWGB5tRPZtT3BlbkFJzycWduCteJvUElJ38c75Ipq2nc3ul8WGTTe1YHuxaVo4tbygSSk0XEF4EZHyeePmrUc8X4VkA}" \
     --from-literal=JWT_SECRET="${JWT_SECRET:-legal-jwt-super-secret-key-development}" \
     --from-literal=SECRET_KEY="${SECRET_KEY:-dev_secret_key_change_in_production}" \
