@@ -32,7 +32,7 @@ env:
   MONGO_DATABASE: "legaldb"
   MONGO_USER: "root"
   
-  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
+  REDIS_HOST: "10.96.109.108"
   REDIS_PORT: "6379"
   REDIS_DB_DEFAULT: "0"
   REDIS_DB_WS: "1"
