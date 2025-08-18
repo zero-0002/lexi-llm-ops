@@ -28,9 +28,9 @@ env:
   PORT: "8000"
   
   # Database connections (non-secret parts)
-  MONGO_URI: "mongodb://legal_user@legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
+  MONGO_URI: "mongodb://root@legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
   MONGO_DATABASE: "legaldb"
-  MONGO_USER: "legal_user"
+  MONGO_USER: "root"
   
   REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
   REDIS_PORT: "6379"

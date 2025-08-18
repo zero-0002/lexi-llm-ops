@@ -54,13 +54,24 @@ metrics:
 replicaSet:
   enabled: false
 
-# Simple init script for legaldb
+# Simple init script - just create databases, use root user
 initdbScripts:
   01-init.js: |
+    // Create databases and collections
     db = db.getSiblingDB('legaldb');
     db.createCollection('conversations');
     db.createCollection('documents');
-    print('Legal database initialized successfully');
+    db.createCollection('messages');
+    print('Legal database created');
+    
+    db = db.getSiblingDB('legal_retrieval');  
+    db.createCollection('conversations');
+    db.createCollection('documents');
+    print('Legal retrieval database created');
+    db = db.getSiblingDB('legal_retrieval');
+    db.createCollection('conversations');
+    db.createCollection('documents');
+    print('Legal retrieval database initialized successfully');
 
 # Disable arbiter
 arbiter:
