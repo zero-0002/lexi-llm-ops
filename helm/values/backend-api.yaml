@@ -7,8 +7,8 @@
 component: api
 
 image:
-  repository: legal-retrieval/backend
-  tag: "latest"
+  repository: legal-chatbot-backend
+  tag: "dns-fix-v1"
   pullPolicy: Never
 
 replicaCount: 1
