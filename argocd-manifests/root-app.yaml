@@ -12,7 +12,9 @@ spec:
     path: argocd-manifests/apps
     directory:
       # Tùy chọn này cho phép đọc cả các thư mục con nếu có
-      recurse: true 
+      recurse: true
+      # Exclude monitoring apps (handled separately)
+      exclude: "*monitoring*" 
   # ==========================================================
   
   destination:
