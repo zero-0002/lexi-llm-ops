@@ -3,6 +3,7 @@ Production-ready configuration management for Legal Chatbot RAG System
 Handles environment variables, validation, and service discovery for K8s deployment
 """
 import os
+import logging
 from typing import List, Optional, Union
 from pydantic_settings import BaseSettings
 from pydantic import field_validator 
@@ -10,6 +11,9 @@ from dotenv import load_dotenv
 import json
 
 load_dotenv()
+
+# Setup logger for settings
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     """Application configuration with environment variable support"""
@@ -98,46 +102,78 @@ def get_qdrant_url() -> str:
     
     return f"http://{qdrant_host}:{qdrant_port}"
 
-# Celery configuration using Redis
+# Celery configuration using Redis with DNS fallback
 def get_celery_broker_url() -> str:
-    """Get Celery broker URL - prefer environment variable, fallback to Redis DB 3"""
+    """Get Celery broker URL - prefer environment variable, fallback to Redis DB 3 with DNS fallback"""
     broker_url = os.getenv('CELERY_BROKER_URL')
     if broker_url:
+        logger.info(f"🔄 Using CELERY_BROKER_URL from environment: {broker_url}")
         return broker_url
-    return get_redis_url(3)
+    
+    # Use fallback mechanism with DNS -> IP fallback
+    fallback_url = get_redis_url_with_fallback(3)
+    logger.info(f"🔄 Generated Celery broker URL with fallback: {fallback_url}")
+    return fallback_url
 
 def get_celery_result_backend_url() -> str:
-    """Get Celery result backend URL - prefer environment variable, fallback to Redis DB 4"""
+    """Get Celery result backend URL - prefer environment variable, fallback to Redis DB 4 with DNS fallback"""
     result_backend = os.getenv('CELERY_RESULT_BACKEND')
     if result_backend:
+        logger.info(f"📊 Using CELERY_RESULT_BACKEND from environment: {result_backend}")
         return result_backend
-    return get_redis_url(4)
+    
+    # Use fallback mechanism with DNS -> IP fallback
+    fallback_url = get_redis_url_with_fallback(4)
+    logger.info(f"📊 Generated Celery result backend URL with fallback: {fallback_url}")
+    return fallback_url
 
 def get_redis_url_with_fallback(db: int = 0) -> str:
-    """Get Redis URL with IP fallback for K8s environments"""
+    """
+    Get Redis URL with DNS-first approach, fallback to IP for K8s environments
+    
+    Strategy:
+    1. Try DNS hostname first (preferred for service discovery)
+    2. If DNS resolution fails, fallback to direct IP resolution
+    3. Enhanced error logging for troubleshooting
+    """
     redis_host = settings.REDIS_HOST
     redis_port = settings.REDIS_PORT
     
-    # Try to resolve hostname and create IP-based URL as fallback
+    # Build URLs for both approaches
+    def build_url(host: str) -> str:
+        if settings.REDIS_PASSWORD:
+            return f"redis://:{settings.REDIS_PASSWORD}@{host}:{redis_port}/{db}"
+        else:
+            return f"redis://{host}:{redis_port}/{db}"
+    
+    # Try DNS resolution first
     try:
         import socket
+        logger.info(f"🔍 Attempting DNS resolution for Redis host: {redis_host}")
         resolved_ip = socket.gethostbyname(redis_host)
         
-        # Log both hostname and IP options
-        hostname_url = f"redis://{redis_host}:{redis_port}/{db}" if not settings.REDIS_PASSWORD else f"redis://:{settings.REDIS_PASSWORD}@{redis_host}:{redis_port}/{db}"
-        ip_url = f"redis://{resolved_ip}:{redis_port}/{db}" if not settings.REDIS_PASSWORD else f"redis://:{settings.REDIS_PASSWORD}@{resolved_ip}:{redis_port}/{db}"
+        hostname_url = build_url(redis_host)
+        ip_url = build_url(resolved_ip)
         
-        print(f"Redis URLs - Hostname: {hostname_url}, IP: {ip_url}")
-        return hostname_url  # Prefer hostname, but IP is available for fallback
+        logger.info(f"✅ DNS resolution successful: {redis_host} -> {resolved_ip}")
+        logger.info(f"🏷️  Hostname URL: {hostname_url}")
+        logger.info(f"🔢 IP URL: {ip_url}")
         
-    except Exception:
-        # Fallback to original logic if resolution fails
-        pass
+        # Return hostname URL (DNS-first approach)
+        # IP URL is available for manual fallback if needed
+        return hostname_url
+        
+    except socket.gaierror as e:
+        logger.warning(f"⚠️  DNS resolution failed for {redis_host}: {e}")
+        logger.info(f"🔄 Falling back to hostname-based URL without resolution")
+    except Exception as e:
+        logger.error(f"❌ Unexpected error during DNS resolution: {e}")
+        logger.info(f"🔄 Falling back to hostname-based URL")
     
-    if settings.REDIS_PASSWORD:
-        return f"redis://:{settings.REDIS_PASSWORD}@{redis_host}:{redis_port}/{db}"
-    else:
-        return f"redis://{redis_host}:{redis_port}/{db}"
+    # Fallback: return URL with original hostname
+    fallback_url = build_url(redis_host)
+    logger.info(f"🔄 Using fallback Redis URL: {fallback_url}")
+    return fallback_url
 
 # Service discovery for Kubernetes
 def get_service_url(service_name: str, port: int = 80, namespace: str = "default") -> str:

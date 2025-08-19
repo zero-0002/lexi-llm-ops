@@ -51,3 +51,7 @@ kubectl delete pod -n argocd -l app.kubernetes.io/name=argocd-repo-server
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo
 kubectl port-forward svc/argocd-server -n argocd 8888:443
 
+### grafana
+kubectl port-forward svc/grafana -n monitoring 3000:80
+
+kubectl exec legal-backend-api-c8d77c8ff-vxcvj -n application -- curl -X POST -H "Content-Type: application/json" -d '{"query":"luat nghia vu quan su"}' http://localhost:8000/api/rag/retrieve

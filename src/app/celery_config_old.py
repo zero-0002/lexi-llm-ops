@@ -2,19 +2,154 @@
 📊 ENHANCED CELERY CONFIGURATION
 ===================================================
 Production-ready Celery setup with structured logging, monitoring, and K8s support
-Uses improved DNS fallback from settings.py
 """
 import os
 import redis
-import logging
 from celery import Celery
 from celery.signals import task_prerun, task_postrun, task_failure, worker_ready, worker_shutdown
 from kombu import Queue
+from app.config.settings import settings, get_redis_url, get_celery_broker_url, get_celery_result_backend_url
+from app.utils.logging_config import perf_logger, app_logger, task_id_ctx
+import logging
 import time
 import uuid
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+def get_celery_broker_url_with_fallback():
+    """Get Celery broker URL with DNS to IP fallback"""
+    try:
+        # First try with environment variable or DNS hostname
+        from app.config.settings import get_celery_broker_url as _get_celery_broker_url
+        primary_url = _get_celery_broker_url()
+        logger.info(f"🔄 Trying primary Celery broker: {primary_url}")
+        
+        # Test connection with Redis
+        import redis
+        import urllib.parse
+        parsed = urllib.parse.urlparse(primary_url)
+        
+        # Extract connection details
+        host = parsed.hostname
+        port = parsed.port or 6379
+        password = parsed.password
+        db = int(parsed.path.lstrip('/')) if parsed.path else 0
+        
+        logger.info(f"🔍 Testing Redis connection to {host}:{port} (db={db})")
+        test_client = redis.Redis(
+            host=host, 
+            port=port, 
+            password=password, 
+            db=db, 
+            socket_connect_timeout=5,
+            socket_timeout=5
+        )
+        test_client.ping()
+        logger.info(f"✅ Primary broker connection successful: {host}:{port}")
+        return primary_url
+        
+    except Exception as primary_error:
+        logger.warning(f"⚠️ Primary broker connection failed: {str(primary_error)}")
+        
+        try:
+            # Fallback to IP-based connection
+            import socket
+            from app.config.settings import settings
+            
+            redis_host_ip = socket.gethostbyname(settings.REDIS_HOST)
+            fallback_url = f"redis://"
+            if settings.REDIS_PASSWORD:
+                fallback_url += f":{settings.REDIS_PASSWORD}@"
+            fallback_url += f"{redis_host_ip}:{settings.REDIS_PORT}/3"
+            
+            logger.info(f"🔄 Trying fallback broker with IP: {fallback_url}")
+            
+            # Test fallback connection
+            test_client = redis.Redis(
+                host=redis_host_ip, 
+                port=int(settings.REDIS_PORT), 
+                password=settings.REDIS_PASSWORD, 
+                db=3, 
+                socket_connect_timeout=5
+            )
+            test_client.ping()
+            logger.info(f"✅ Fallback broker connection successful: {redis_host_ip}:{settings.REDIS_PORT}")
+            return fallback_url
+            
+        except Exception as fallback_error:
+            logger.error(f"❌ Both primary and fallback broker connections failed!")
+            logger.error(f"   Primary error: {str(primary_error)}")
+            logger.error(f"   Fallback error: {str(fallback_error)}")
+            # Return primary URL anyway, let Celery handle retries
+            return _get_celery_broker_url()
+
+def get_celery_result_backend_url_with_fallback():
+    """Get Celery result backend URL with DNS to IP fallback"""
+    try:
+        # First try with environment variable or DNS hostname
+        from app.config.settings import get_celery_result_backend_url as _get_celery_result_backend_url
+        primary_url = _get_celery_result_backend_url()
+        logger.info(f"📊 Trying primary result backend: {primary_url}")
+        
+        # Test connection with Redis
+        import redis
+        import urllib.parse
+        parsed = urllib.parse.urlparse(primary_url)
+        
+        # Extract connection details
+        host = parsed.hostname
+        port = parsed.port or 6379
+        password = parsed.password
+        db = int(parsed.path.lstrip('/')) if parsed.path else 0
+        
+        logger.info(f"🔍 Testing Redis connection to {host}:{port} (db={db})")
+        test_client = redis.Redis(
+            host=host, 
+            port=port, 
+            password=password, 
+            db=db, 
+            socket_connect_timeout=5,
+            socket_timeout=5
+        )
+        test_client.ping()
+        logger.info(f"✅ Primary result backend connection successful: {host}:{port}")
+        return primary_url
+        
+    except Exception as primary_error:
+        logger.warning(f"⚠️ Primary result backend connection failed: {str(primary_error)}")
+        
+        try:
+            # Fallback to IP-based connection
+            import socket
+            from app.config.settings import settings
+            
+            redis_host_ip = socket.gethostbyname(settings.REDIS_HOST)
+            fallback_url = f"redis://"
+            if settings.REDIS_PASSWORD:
+                fallback_url += f":{settings.REDIS_PASSWORD}@"
+            fallback_url += f"{redis_host_ip}:{settings.REDIS_PORT}/4"
+            
+            logger.info(f"📊 Trying fallback result backend with IP: {fallback_url}")
+            
+            # Test fallback connection
+            test_client = redis.Redis(
+                host=redis_host_ip, 
+                port=int(settings.REDIS_PORT), 
+                password=settings.REDIS_PASSWORD, 
+                db=4, 
+                socket_connect_timeout=5
+            )
+            test_client.ping()
+            logger.info(f"✅ Fallback result backend connection successful: {redis_host_ip}:{settings.REDIS_PORT}")
+            return fallback_url
+            
+        except Exception as fallback_error:
+            logger.error(f"❌ Both primary and fallback result backend connections failed!")
+            logger.error(f"   Primary error: {str(primary_error)}")
+            logger.error(f"   Fallback error: {str(fallback_error)}")
+            # Return primary URL anyway, let Celery handle retries
+            return _get_celery_result_backend_url()
 
 # Determine which tasks to include based on worker type
 WORKER_TYPE = os.getenv('WORKER_TYPE', 'all')
@@ -110,24 +245,33 @@ celery_app.conf.update(
     task_time_limit=600,       # 10 minutes
     
     # Retries
-    task_reject_on_worker_lost=True,
+    task_retry_backoff=True,
+    task_retry_backoff_max=700,
+    task_retry_jitter=False,
+    
+    # Results
+    result_expires=3600,  # 1 hour
+    
+    # Worker configuration
+    worker_log_format='[%(asctime)s: %(levelname)s/%(processName)s] %(message)s',
+    worker_task_log_format='[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s',
 )
 
-# Queue configurations based on worker type
+# Queue configuration based on worker type
 queue_config = {
-    'all': [
-        Queue('rag_queue', routing_key='rag'),
-        Queue('embed_queue', routing_key='embed'),
-        Queue('retrieval_queue', routing_key='retrieval'),
-        Queue('link_extract_queue', routing_key='link_extract'),
-    ],
-    'rag': [Queue('rag_queue', routing_key='rag')],
-    'embed': [Queue('embed_queue', routing_key='embed')],
-    'retrieval': [Queue('retrieval_queue', routing_key='retrieval')],
-    'link': [Queue('link_extract_queue', routing_key='link_extract')],
+    'all': (
+        Queue('rag_queue', routing_key='rag.#'),
+        Queue('embed_queue', routing_key='embed.#'),
+        Queue('retrieval_queue', routing_key='retrieval.#'),
+        Queue('link_extract_queue', routing_key='link_extract.#'),
+    ),
+    'rag': (Queue('rag_queue', routing_key='rag.#'),),
+    'embed': (Queue('embed_queue', routing_key='embed.#'),),
+    'retrieval': (Queue('retrieval_queue', routing_key='retrieval.#'),),
+    'link': (Queue('link_extract_queue', routing_key='link_extract.#'),)
 }
 
-# Routing configurations based on worker type
+# Task routing configuration based on worker type
 routing_config = {
     'all': {
         'app.tasks.legal_rag_tasks.*': {
@@ -177,23 +321,51 @@ routing_config = {
 celery_app.conf.task_queues = queue_config.get(WORKER_TYPE, queue_config['all'])
 celery_app.conf.task_routes = routing_config.get(WORKER_TYPE, routing_config['all'])
 
-# Force update broker and backend URLs to override environment variables
-from app.config.settings import get_celery_broker_url, get_celery_result_backend_url
-
-updated_broker = get_celery_broker_url()
-updated_backend = get_celery_result_backend_url()
-
-celery_app.conf.update(
-    broker_url=updated_broker,
-    result_backend=updated_backend
-)
-
-# Enhanced logging configuration
-logger.info(f"🔄 Celery broker URL: {updated_broker}")
-logger.info(f"📊 Celery result backend URL: {updated_backend}")
+# Final configuration logging
+logger.info("🎯 =========================")
+logger.info("🎯 CELERY CONFIGURATION SUMMARY")
+logger.info("🎯 =========================")
 logger.info(f"🔧 Final broker URL: {celery_app.conf.broker_url}")
 logger.info(f"🔧 Final backend URL: {celery_app.conf.result_backend}")
+logger.info(f"⚙️ Worker type: {WORKER_TYPE}")
 logger.info(f"📊 Task queues: {[q.name for q in celery_app.conf.task_queues]}")
+logger.info(f"🔄 Broker connection retry: {celery_app.conf.broker_connection_retry}")
+logger.info(f"⏱️ Broker connection timeout: {celery_app.conf.broker_connection_timeout}s")
+logger.info("🎯 =========================")
+
+# Test final connection
+try:
+    logger.info("🧪 Testing final Celery connections...")
+    import redis
+    import urllib.parse
+    
+    # Test broker connection
+    broker_parsed = urllib.parse.urlparse(celery_app.conf.broker_url)
+    broker_client = redis.Redis(
+        host=broker_parsed.hostname,
+        port=broker_parsed.port or 6379,
+        password=broker_parsed.password,
+        db=int(broker_parsed.path.lstrip('/')) if broker_parsed.path else 0,
+        socket_connect_timeout=3
+    )
+    broker_client.ping()
+    logger.info("✅ Final broker connection test: SUCCESS")
+    
+    # Test backend connection  
+    backend_parsed = urllib.parse.urlparse(celery_app.conf.result_backend)
+    backend_client = redis.Redis(
+        host=backend_parsed.hostname,
+        port=backend_parsed.port or 6379,
+        password=backend_parsed.password,
+        db=int(backend_parsed.path.lstrip('/')) if backend_parsed.path else 0,
+        socket_connect_timeout=3
+    )
+    backend_client.ping()
+    logger.info("✅ Final backend connection test: SUCCESS")
+    
+except Exception as e:
+    logger.error(f"❌ Final connection test failed: {str(e)}")
+    logger.error("⚠️ Celery will attempt reconnection with built-in retry logic")
 
 # Task state tracking
 task_performance = {}
@@ -208,7 +380,6 @@ def log_task_start(task_id, task, *args, **kwargs):
         'timestamp': datetime.utcnow().isoformat()
     }
     
-    from app.utils.logging_config import perf_logger, task_id_ctx
     token = task_id_ctx.set(task_id)
     try:
         perf_logger.info(
@@ -232,7 +403,6 @@ def log_task_completion(task_id, task, retval, state, *args, **kwargs):
         start_time = task_performance[task_id]['start_time']
         duration = time.time() - start_time
         
-        from app.utils.logging_config import perf_logger, task_id_ctx
         token = task_id_ctx.set(task_id)
         try:
             perf_logger.info(
@@ -255,7 +425,6 @@ def log_task_completion(task_id, task, retval, state, *args, **kwargs):
 @task_failure.connect
 def log_task_failure(task_id, exception, einfo, *args, **kwargs):
     """Log task failures with error details"""
-    from app.utils.logging_config import app_logger, task_id_ctx
     token = task_id_ctx.set(task_id)
     try:
         app_logger.error(
@@ -273,13 +442,11 @@ def log_task_failure(task_id, exception, einfo, *args, **kwargs):
 @worker_ready.connect
 def worker_ready_handler(sender=None, **kwargs):
     """Log when worker is ready"""
-    from app.utils.logging_config import app_logger
     app_logger.info(f"🟢 Celery worker {sender.hostname} is ready")
 
 @worker_shutdown.connect
 def worker_shutdown_handler(sender=None, **kwargs):
     """Log when worker shuts down"""
-    from app.utils.logging_config import app_logger
     app_logger.info(f"🔴 Celery worker {sender.hostname} is shutting down")
 
 # Health check utility
@@ -300,7 +467,6 @@ def get_celery_status():
             'backend_url': celery_app.conf.result_backend
         }
         
-        from app.utils.logging_config import app_logger
         app_logger.info(
             "Celery status check",
             extra={
@@ -312,7 +478,6 @@ def get_celery_status():
         
         return status
     except Exception as e:
-        from app.utils.logging_config import app_logger
         app_logger.error(
             "Failed to get Celery status",
             extra={
