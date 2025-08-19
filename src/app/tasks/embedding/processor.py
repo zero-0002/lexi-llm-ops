@@ -171,12 +171,8 @@ class DocumentProcessor:
         # Step 4: Save chunks
         saved_count = 0
         if filtered_results:
-            filtered_chunks = [result.chunk for result in filtered_results]
-            # Update similarity scores
-            for i, result in enumerate(filtered_results):
-                filtered_chunks[i].similarity_score = result.final_score
-            
-            saved_count = self.save_chunks_to_redis(filtered_chunks, task_logger)
+            # filtered_results is already a list of TextChunk objects
+            saved_count = self.save_chunks_to_redis(filtered_results, task_logger)
         else:
             logger.warning(f"No chunks to save for document: {doc_id}")
         

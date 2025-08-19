@@ -14,16 +14,23 @@ env:
   DEBUG: "true"
   LOG_LEVEL: "INFO"
   
-  # Database connections (matching docker-compose)
-  MONGO_URL: "mongodb://admin:password123@legal-mongodb:27017/legaldb?authSource=admin"
-  REDIS_URL: "redis://legal-redis:6379/0"
-  REDIS_URL_WS: "redis://legal-redis:6379/1"
-  REDIS_URL_RETRIEVAL: "redis://legal-redis:6379/2"
-  QDRANT_URL: "http://legal-qdrant:6333"
+  # Database connections (Full K8s cluster DNS names matching backend)
+  MONGO_HOST: "legal-mongodb.data-service.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_USER: "root"
+  MONGO_PASSWORD: "password123"
+  MONGO_DATABASE: "legaldb"
+  MONGO_AUTH_SOURCE: "admin"
   
-  # Celery configuration
-  CELERY_BROKER_URL: "redis://legal-redis:6379/3"
-  CELERY_RESULT_BACKEND: "redis://legal-redis:6379/4"
+  # Redis with full K8s cluster DNS name (DNS fallback handled in settings.py)
+  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
+  REDIS_PORT: "6379"
+  
+  # Qdrant with full K8s cluster DNS name
+  QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  
+  # Celery configuration using environment variables (DNS fallback in settings.py)
   CELERY_QUEUES: "rag_queue,embed_queue,retrieval_queue,link_extract_queue"
   CELERY_CONCURRENCY: "2"
   CELERY_LOGLEVEL: "info"

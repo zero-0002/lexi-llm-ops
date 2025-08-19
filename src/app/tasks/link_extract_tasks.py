@@ -18,12 +18,15 @@ def get_links_and_extract_task(query: str, max_links: int, max_workers: int = 3)
     # Get links from SERPER or fallback to mock data
     data_links = get_links_from_serper(query, num_results=15)
     
+    logger.info(f"📊 SERPER API returned {len(data_links) if data_links else 0} results")
     # If no results from SERPER (e.g., missing API key), use mock data
     if not data_links or (len(data_links) == 1 and "error" in data_links[0]):
+        if len(data_links) == 1 and "error" in data_links[0]:
+            logger.info(f"⚠️ SERPER API error: {data_links[0]['error']}")
         logger.info("Using mock data for testing")
         data_links = [
-            {"title": "Test Legal Document 1", "url": "https://example.com/test1", "snippet": "Test snippet 1"},
-            {"title": "Test Legal Document 2", "url": "https://example.com/test2", "snippet": "Test snippet 2"}
+            {"title": "Test Legal Document 1", "url": "https://example.com", "snippet": "Test snippet 1"},
+            {"title": "Test Legal Document 2", "url": "https://example.com", "snippet": "Test snippet 2"}
         ]
 
     data_links_new = []

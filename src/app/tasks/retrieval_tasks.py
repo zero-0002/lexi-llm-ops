@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def retrieval_document(query: str):
     logger.info(f"Retrieving chunks for query: {query}")
     start_time = time.time()
-    chunks = rag_service.search("law_corpus_openai", query)
+    chunks = rag_service.search("legal_documents_collection", query)
     duration = time.time() - start_time
     logger.info(f"Retrieval completed in {duration:.2f} seconds")
     saved_count = save_chunks_to_redis(chunks)

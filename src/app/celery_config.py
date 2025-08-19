@@ -2,19 +2,34 @@
 📊 ENHANCED CELERY CONFIGURATION
 ===================================================
 Production-ready Celery setup with structured logging, monitoring, and K8s support
-Uses improved DNS fallback from settings.py
 """
 import os
 import redis
-import logging
 from celery import Celery
 from celery.signals import task_prerun, task_postrun, task_failure, worker_ready, worker_shutdown
 from kombu import Queue
+from app.config.settings import settings, get_redis_url, get_celery_broker_url, get_celery_result_backend_url
+from app.utils.logging_config import perf_logger, app_logger, task_id_ctx
+import logging
 import time
 import uuid
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+def get_celery_broker_url():
+    """Get Celery broker URL using environment variables"""
+    from app.config.settings import get_celery_broker_url as _get_celery_broker_url
+    broker_url = _get_celery_broker_url()
+    logger.info(f"🔄 Using Celery broker from environment: {broker_url}")
+    return broker_url
+
+def get_celery_result_backend_url():
+    """Get Celery result backend URL using environment variables"""
+    from app.config.settings import get_celery_result_backend_url as _get_celery_result_backend_url
+    result_backend = _get_celery_result_backend_url()
+    logger.info(f"📊 Using Celery result backend from environment: {result_backend}")
+    return result_backend
 
 # Determine which tasks to include based on worker type
 WORKER_TYPE = os.getenv('WORKER_TYPE', 'all')
@@ -32,18 +47,11 @@ task_includes = {
     'link': ["app.tasks.link_extract_tasks"]
 }
 
-# Create Celery app with enhanced configuration using improved settings
-logger.info("🚀 Initializing Celery app with enhanced DNS fallback support...")
-
-from app.config.settings import get_celery_broker_url, get_celery_result_backend_url
-
-broker_url = get_celery_broker_url()
-backend_url = get_celery_result_backend_url()
-
+# Create Celery app with enhanced configuration
 celery_app = Celery(
     "legal_chatbot_tasks",
-    broker=broker_url,
-    backend=backend_url,
+    broker=get_celery_broker_url(),
+    backend=get_celery_result_backend_url(),
     include=task_includes.get(WORKER_TYPE, task_includes['all'])
 )
 
@@ -110,24 +118,33 @@ celery_app.conf.update(
     task_time_limit=600,       # 10 minutes
     
     # Retries
-    task_reject_on_worker_lost=True,
+    task_retry_backoff=True,
+    task_retry_backoff_max=700,
+    task_retry_jitter=False,
+    
+    # Results
+    result_expires=3600,  # 1 hour
+    
+    # Worker configuration
+    worker_log_format='[%(asctime)s: %(levelname)s/%(processName)s] %(message)s',
+    worker_task_log_format='[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s',
 )
 
-# Queue configurations based on worker type
+# Queue configuration based on worker type
 queue_config = {
-    'all': [
-        Queue('rag_queue', routing_key='rag'),
-        Queue('embed_queue', routing_key='embed'),
-        Queue('retrieval_queue', routing_key='retrieval'),
-        Queue('link_extract_queue', routing_key='link_extract'),
-    ],
-    'rag': [Queue('rag_queue', routing_key='rag')],
-    'embed': [Queue('embed_queue', routing_key='embed')],
-    'retrieval': [Queue('retrieval_queue', routing_key='retrieval')],
-    'link': [Queue('link_extract_queue', routing_key='link_extract')],
+    'all': (
+        Queue('rag_queue', routing_key='rag.#'),
+        Queue('embed_queue', routing_key='embed.#'),
+        Queue('retrieval_queue', routing_key='retrieval.#'),
+        Queue('link_extract_queue', routing_key='link_extract.#'),
+    ),
+    'rag': (Queue('rag_queue', routing_key='rag.#'),),
+    'embed': (Queue('embed_queue', routing_key='embed.#'),),
+    'retrieval': (Queue('retrieval_queue', routing_key='retrieval.#'),),
+    'link': (Queue('link_extract_queue', routing_key='link_extract.#'),)
 }
 
-# Routing configurations based on worker type
+# Task routing configuration based on worker type
 routing_config = {
     'all': {
         'app.tasks.legal_rag_tasks.*': {
@@ -177,22 +194,8 @@ routing_config = {
 celery_app.conf.task_queues = queue_config.get(WORKER_TYPE, queue_config['all'])
 celery_app.conf.task_routes = routing_config.get(WORKER_TYPE, routing_config['all'])
 
-# Force update broker and backend URLs to override environment variables
-from app.config.settings import get_celery_broker_url, get_celery_result_backend_url
-
-updated_broker = get_celery_broker_url()
-updated_backend = get_celery_result_backend_url()
-
-celery_app.conf.update(
-    broker_url=updated_broker,
-    result_backend=updated_backend
-)
-
-# Enhanced logging configuration
-logger.info(f"🔄 Celery broker URL: {updated_broker}")
-logger.info(f"📊 Celery result backend URL: {updated_backend}")
-logger.info(f"🔧 Final broker URL: {celery_app.conf.broker_url}")
-logger.info(f"🔧 Final backend URL: {celery_app.conf.result_backend}")
+# Logging configuration
+logger.info(f"🔄 Celery configured with broker: {get_celery_broker_url()}")
 logger.info(f"📊 Task queues: {[q.name for q in celery_app.conf.task_queues]}")
 
 # Task state tracking
@@ -208,7 +211,6 @@ def log_task_start(task_id, task, *args, **kwargs):
         'timestamp': datetime.utcnow().isoformat()
     }
     
-    from app.utils.logging_config import perf_logger, task_id_ctx
     token = task_id_ctx.set(task_id)
     try:
         perf_logger.info(
@@ -232,7 +234,6 @@ def log_task_completion(task_id, task, retval, state, *args, **kwargs):
         start_time = task_performance[task_id]['start_time']
         duration = time.time() - start_time
         
-        from app.utils.logging_config import perf_logger, task_id_ctx
         token = task_id_ctx.set(task_id)
         try:
             perf_logger.info(
@@ -255,7 +256,6 @@ def log_task_completion(task_id, task, retval, state, *args, **kwargs):
 @task_failure.connect
 def log_task_failure(task_id, exception, einfo, *args, **kwargs):
     """Log task failures with error details"""
-    from app.utils.logging_config import app_logger, task_id_ctx
     token = task_id_ctx.set(task_id)
     try:
         app_logger.error(
@@ -273,13 +273,11 @@ def log_task_failure(task_id, exception, einfo, *args, **kwargs):
 @worker_ready.connect
 def worker_ready_handler(sender=None, **kwargs):
     """Log when worker is ready"""
-    from app.utils.logging_config import app_logger
     app_logger.info(f"🟢 Celery worker {sender.hostname} is ready")
 
 @worker_shutdown.connect
 def worker_shutdown_handler(sender=None, **kwargs):
     """Log when worker shuts down"""
-    from app.utils.logging_config import app_logger
     app_logger.info(f"🔴 Celery worker {sender.hostname} is shutting down")
 
 # Health check utility
@@ -300,7 +298,6 @@ def get_celery_status():
             'backend_url': celery_app.conf.result_backend
         }
         
-        from app.utils.logging_config import app_logger
         app_logger.info(
             "Celery status check",
             extra={
@@ -312,7 +309,6 @@ def get_celery_status():
         
         return status
     except Exception as e:
-        from app.utils.logging_config import app_logger
         app_logger.error(
             "Failed to get Celery status",
             extra={

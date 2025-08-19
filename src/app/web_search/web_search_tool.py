@@ -4,8 +4,8 @@ Simple Web Search Tool using SERPER API
 import requests
 import os
 from typing import List, Dict
-from dotenv import load_dotenv
-load_dotenv()
+
+# Get SERPER_API_KEY from environment (Kubernetes secret or .env file)
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
 def get_links_from_serper(query: str, num_results: int = 5) -> List[Dict]:

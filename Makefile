@@ -1,6 +1,6 @@
-# Legal Retrieval System - Docker Management Makefile
+# Legal Retrieval System - Development Makefile
 # =======================================================
-# Quick commands for building, pushing and managing Docker services
+# Quick commands for Kubernetes development and Docker Compose testing
 # =======================================================
 
 # Default values
@@ -8,7 +8,7 @@ REGISTRY ?= docker.io
 TAG ?= latest
 TARGET ?= all
 
-# Docker Compose settings
+# Docker Compose settings (for local testing only)
 COMPOSE_FILE ?= docker-compose.yml
 PROJECT_NAME ?= legal-retrieval
 
@@ -22,17 +22,22 @@ NC = \e[0m
 # Help target (default)
 .PHONY: help
 help:
-	@echo -e "$(BLUE)[Legal Retrieval System - Docker Management]$(NC)"
-	@echo -e "=================================================="
+	@echo -e "$(BLUE)[Legal Retrieval System - Development Tools]$(NC)"
+	@echo -e "==============================================="
 	@echo -e ""
-	@echo -e "$(GREEN)[Build Commands]$(NC)"
-	@echo -e "  make build                    Build all services"
-	@echo -e "  make build-backend           Build backend service only"
-	@echo -e "  make build-frontend          Build frontend service only"
-	@echo -e "  make build-clean             Build without Docker cache"
+	@echo -e "$(GREEN)[Kubernetes Development]$(NC)"
+	@echo -e "  make k8s-dev                 Deploy to Kubernetes (development)"
+	@echo -e "  make k8s-clean               Clean Kubernetes resources"
+	@echo -e "  make k8s-status              Show Kubernetes status"
+	@echo -e "  make k8s-logs                View application logs"
 	@echo -e ""
-	@echo -e "$(GREEN)[Deploy Commands]$(NC)"
-	@echo -e "  make up                      Start all services"
+	@echo -e "$(GREEN)[Local Docker Build (Dev Only)]$(NC)"
+	@echo -e "  make build-local             Build images locally for K8s"
+	@echo -e "  make build-backend-local     Build backend image locally"
+	@echo -e "  make build-frontend-local    Build frontend image locally"
+	@echo -e ""
+	@echo -e "$(GREEN)[Docker Compose (Local Testing)]$(NC)"
+	@echo -e "  make up                      Start all services via Docker Compose"
 	@echo -e "  make down                    Stop all services"
 	@echo -e "  make restart                 Restart all services"
 	@echo -e "  make logs                    View all service logs"
@@ -69,6 +74,95 @@ help:
 	@echo -e "  make build-backend TAG=v1.0.0"
 	@echo -e "  make up"
 	@echo -e "  make health"
+
+# =======================================================
+# KUBERNETES DEVELOPMENT TARGETS
+# =======================================================
+
+.PHONY: k8s-dev k8s-clean k8s-status k8s-logs
+k8s-dev:
+	@echo "$(BLUE)🚀 Deploying to Kubernetes (Development)...$(NC)"
+	@if [ -f ./scripts/quick-dev-deploy.sh ]; then \
+		./scripts/quick-dev-deploy.sh; \
+	else \
+		echo "$(RED)❌ Quick dev deploy script not found$(NC)"; \
+		exit 1; \
+	fi
+
+k8s-clean:
+	@echo "$(YELLOW)🧹 Cleaning Kubernetes resources...$(NC)"
+	@echo "This will remove all application resources."
+	@echo "Type 'yes' to confirm:"
+	@read confirm && [ "$$confirm" = "yes" ] || exit 1
+	@kubectl delete namespace application data-service monitoring --ignore-not-found=true
+	@echo "$(GREEN)✅ Kubernetes resources cleaned$(NC)"
+
+k8s-status:
+	@echo "$(BLUE)📊 Kubernetes Status:$(NC)"
+	@echo "===================="
+	@echo ""
+	@echo "$(GREEN)Namespaces:$(NC)"
+	@kubectl get ns | grep -E "(application|data-service|monitoring|argocd)" || echo "No application namespaces found"
+	@echo ""
+	@echo "$(GREEN)ArgoCD Applications:$(NC)"
+	@kubectl get applications -n argocd 2>/dev/null || echo "ArgoCD not deployed"
+	@echo ""
+	@echo "$(GREEN)Application Pods:$(NC)"
+	@kubectl get pods -n application 2>/dev/null || echo "Application namespace not found"
+
+k8s-logs:
+	@echo "$(BLUE)📋 Kubernetes Application Logs:$(NC)"
+	@echo "================================="
+	@echo ""
+	@echo "$(GREEN)Backend API:$(NC)"
+	@kubectl logs -n application deployment/legal-backend-api --tail=10 2>/dev/null || echo "Backend not found"
+	@echo ""
+	@echo "$(GREEN)Workers:$(NC)"
+	@kubectl logs -n application deployment/legal-celery-worker-rag --tail=5 2>/dev/null || echo "Workers not found"
+
+# =======================================================
+# LOCAL BUILD TARGETS (for Kubernetes development)
+# =======================================================
+
+.PHONY: build-local build-backend-local build-frontend-local
+build-local:
+	@echo "$(BLUE)🔨 Building images locally for Kubernetes...$(NC)"
+	@make build-backend-local
+	@make build-frontend-local
+	@echo "$(GREEN)✅ All local images built$(NC)"
+
+build-backend-local:
+	@echo "$(BLUE)🔨 Building backend image locally...$(NC)"
+	@docker build -t tinhnguyen0110/legal-backend-api:latest -f src/app/Dockerfile src/app/
+	@if command -v kind >/dev/null 2>&1; then \
+		echo "$(YELLOW)📦 Loading image into kind cluster...$(NC)"; \
+		kind load docker-image tinhnguyen0110/legal-backend-api:latest --name dev-cluster; \
+	fi
+	@echo "$(GREEN)✅ Backend image built$(NC)"
+
+build-frontend-local:
+	@echo "$(BLUE)🔨 Building frontend image locally...$(NC)"
+	@docker build -t tinhnguyen0110/legal-frontend:latest -f src/legal-chatbot-fe/Dockerfile src/legal-chatbot-fe/
+	@if command -v kind >/dev/null 2>&1; then \
+		echo "$(YELLOW)📦 Loading image into kind cluster...$(NC)"; \
+		kind load docker-image tinhnguyen0110/legal-frontend:latest --name dev-cluster; \
+	fi
+	@echo "$(GREEN)✅ Frontend image built$(NC)"
+
+# =======================================================
+# PRODUCTION DEPLOYMENT NOTES
+# =======================================================
+# For production deployment:
+# 1. Images are built and pushed via CI/CD pipeline
+# 2. ArgoCD handles GitOps deployment
+# 3. Registry: Use production registry (not docker.io)
+# 4. Monitoring: Deployed via separate ArgoCD application
+# 
+# Development workflow:
+# - Local testing: Docker Compose (make quick-start)
+# - K8s development: ArgoCD + local images (make quick-start-k8s)
+# - Production: CI/CD + ArgoCD GitOps
+# =======================================================
 
 # =======================================================
 # DOCKER COMPOSE TARGETS
@@ -146,27 +240,28 @@ db-logs:
 	@docker-compose -f $(COMPOSE_FILE) logs -f mongodb redis qdrant
 
 # =======================================================
-# BUILD TARGETS
+# DOCKER COMPOSE BUILD TARGETS (Local Testing Only)
 # =======================================================
 
 .PHONY: build build-backend build-frontend build-clean
 build:
-	@echo "$(BLUE)🔨 Building all services...$(NC)"
+	@echo "$(BLUE)🔨 Building all services for Docker Compose...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) build
 	@echo "$(GREEN)✅ All services built$(NC)"
+	@echo "$(YELLOW)Note: For Kubernetes, use 'make build-local'$(NC)"
 
 build-backend:
-	@echo "$(BLUE)🔨 Building backend service...$(NC)"
+	@echo "$(BLUE)🔨 Building backend service for Docker Compose...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) build backend-api
 	@echo "$(GREEN)✅ Backend built$(NC)"
 
 build-frontend:
-	@echo "$(BLUE)🔨 Building frontend service...$(NC)"
+	@echo "$(BLUE)🔨 Building frontend service for Docker Compose...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) build frontend
 	@echo "$(GREEN)✅ Frontend built$(NC)"
 
 build-clean:
-	@echo "$(BLUE)🔨 Building all services (no cache)...$(NC)"
+	@echo "$(BLUE)🔨 Building all services (no cache) for Docker Compose...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) build --no-cache
 	@echo "$(GREEN)✅ All services built (clean)$(NC)"
 
@@ -293,10 +388,10 @@ show-urls:
 # QUICK START HELPERS
 # =======================================================
 
-.PHONY: quick-start stop-all
+.PHONY: quick-start quick-start-k8s stop-all
 quick-start:
-	@echo "$(BLUE)🚀 Quick Start - Legal Retrieval System$(NC)"
-	@echo "=========================================="
+	@echo "$(BLUE)🚀 Quick Start - Legal Retrieval System (Docker Compose)$(NC)"
+	@echo "=========================================================="
 	@echo ""
 	@echo "$(YELLOW)1. Checking environment...$(NC)"
 	@make --no-print-directory check-env
@@ -312,8 +407,26 @@ quick-start:
 	@echo ""
 	@make --no-print-directory show-urls
 
+quick-start-k8s:
+	@echo "$(BLUE)🚀 Quick Start - Legal Retrieval System (Kubernetes)$(NC)"
+	@echo "====================================================="
+	@echo ""
+	@echo "$(YELLOW)This will deploy the full system to Kubernetes$(NC)"
+	@echo "$(YELLOW)Make sure you have a Kubernetes cluster running$(NC)"
+	@echo ""
+	@make --no-print-directory k8s-dev
+
 stop-all:
 	@echo "$(BLUE)🛑 Stopping All Services$(NC)"
 	@echo "============================"
-	@make --no-print-directory down
-	@echo "$(GREEN)✅ All services stopped$(NC)"
+	@echo ""
+	@echo "Choose deployment type to stop:"
+	@echo "1) Docker Compose (local)"
+	@echo "2) Kubernetes"
+	@echo -n "Enter choice [1-2]: "
+	@read choice; \
+	case $$choice in \
+		1) make --no-print-directory down ;; \
+		2) make --no-print-directory k8s-clean ;; \
+		*) echo "$(RED)Invalid choice$(NC)" ;; \
+	esac

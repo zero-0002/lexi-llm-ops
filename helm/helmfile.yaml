@@ -15,14 +15,14 @@ repositories:
     url: https://charts.external-secrets.io
 
 releases:
-#### External Secrets Setup
-  - name: setup-secrets
-    namespace: secrets-management
-    chart: ./charts/setup-secrets
-    values:
-      - values/setup-secrets.yaml
-    labels:
-      app: setup-secrets
+#### External Secrets Setup with cloud-native
+  # - name: setup-secrets
+  #   namespace: secrets-management
+  #   chart: ./charts/setup-secrets
+  #   values:
+  #     - values/setup-secrets.yaml
+  #   labels:
+  #     app: setup-secrets
 
 #### Releases database 
   - name: legal-mongodb

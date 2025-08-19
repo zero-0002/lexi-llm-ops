@@ -13,6 +13,7 @@ ENV/
 
 ns.json
 
+backup/
 data/
 reports/
 tests/

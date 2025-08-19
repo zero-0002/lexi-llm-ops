@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     MONGO_HOST: str = os.getenv("MONGO_HOST", "mongodb")
     MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
     MONGO_USER: str = os.getenv("MONGO_USER", "admin")
-    MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD", "password123")
+    MONGO_PASSWORD: str = os.getenv("MONGODB_PASSWORD", "password123")  # Use MONGODB_PASSWORD from secret
     MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "chat_db")
     MONGO_AUTH_SOURCE: str = os.getenv("MONGO_AUTH_SOURCE", "admin")
     

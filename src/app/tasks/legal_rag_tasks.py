@@ -58,7 +58,7 @@ def generate_legal_response(
         if using_retrieval:
             retrieval_start_time = time.time()
             logger.info("🔍 Legal retrieval enabled, fetching documents from Redis...")
-            legal_documents = wait_for_legal_chunks(redis_client_retrieval, key="retrieval_chunks", timeout=10)
+            legal_documents = wait_for_legal_chunks(redis_client_retrieval, key="retrieval_chunks", timeout=30)
             logger.info(f"Retrieved {len(legal_documents)} legal documents in {time.time() - retrieval_start_time:.2f}s")
             if legal_documents:
                 logger.info(f"Sample legal document: {legal_documents[0]['text'][:300]}")
@@ -68,7 +68,7 @@ def generate_legal_response(
         if using_web_search:
             web_search_start_time = time.time()
             logger.info("🌐 Web search enabled, fetching results from Redis...")
-            web_results = wait_for_web_chunks(redis_client_web, key="web_search_chunks", timeout=10)
+            web_results = wait_for_web_chunks(redis_client_web, key="web_search_chunks", timeout=30)
             logger.info(f"Retrieved {len(web_results)} web results in {time.time() - web_search_start_time:.2f}s")
             if web_results:
                 logger.info(f"Sample web result: {web_results[0]['text'][:300]}")

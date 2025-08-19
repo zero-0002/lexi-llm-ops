@@ -1,11 +1,12 @@
 // filepath: d:\Data\Legal-Retrieval\legal-chatbot-fe\src\services\api.js
 import axios from 'axios';
-const HOST = "localhost:8000"
-// const HOST = "nutten-gnu-termination-jennifer.trycloudflare.com"
-const API_BASE = `http://${HOST}/api/legal-chat`;
-const RAG_BASE = `http://${HOST}/api/rag`;
+
+// Use relative paths - Nginx will proxy to backend service
+// This way frontend doesn't need to know backend URL
+const API_BASE = '/api/legal-chat';
+const RAG_BASE = '/api/rag';
 const USER_ID = 'tinh123';
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';  // Empty for relative URLs
 
 class ApiClient {
   constructor() {

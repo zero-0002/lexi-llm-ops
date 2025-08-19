@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "legal-backend.fullname" . }}-api
+  name: {{ include "legal-backend.fullname" . }}
   labels:
     {{- include "legal-backend.labels" . | nindent 4 }}
     app.kubernetes.io/component: api
@@ -15,5 +15,5 @@ spec:
       name: http
   selector:
     {{- include "legal-backend.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: api
+    component: api
 {{- end }}

@@ -39,6 +39,30 @@ def embed_query_task(query: str):
     return embed_query_sync(query)
 
 
+def process_web_chunks_for_rag(document_data: Dict[str, Any], query: str, top_k: int = 5) -> Dict[str, Any]:
+    """Process web document and create web_search_chunks for RAG"""
+    logger.info(f"Processing web document for RAG: {document_data.get('doc_id', 'unknown')}")
+    
+    try:
+        from app.tasks.embedding.processor import DocumentProcessor
+        processor = DocumentProcessor.get_instance()
+        
+        # Process document and create chunks
+        result = processor.process_document(document_data, query, top_k)
+        
+        if result.get('success'):
+            logger.info(f"Successfully created web_search_chunks: {result['document_id']} | "
+                       f"saved_chunks={result['saved_chunks']} | score={result.get('average_score', 0):.3f}")
+            return result
+        else:
+            logger.warning(f"Failed to process web document for RAG: {result.get('message')}")
+            return result
+            
+    except Exception as e:
+        logger.error(f"Error processing web chunks for RAG: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+
 @celery_app.task(name="app.tasks.legal_embedding_tasks.process_legal_document_embedding", queue="embed_queue")
 def process_legal_document_embedding(document_chunks: List[Dict[str, Any]], batch_size: int = 32):
     """Process legal document embeddings in batches"""
@@ -103,8 +127,37 @@ def process_legal_document_embedding(document_chunks: List[Dict[str, Any]], batc
         # Store embeddings in vector database
         store_legal_embeddings(processed_chunks)
         
+        # Process web chunks for RAG if this is a web document
+        web_chunks_results = []
+        for document_data in document_chunks:
+            logger.info(f"Checking document for web processing: doc_id={document_data.get('doc_id', 'unknown')}")
+            logger.info(f"Document method: {document_data.get('method')}")
+            logger.info(f"Document URL: {document_data.get('url')}")
+            logger.info(f"Document query: '{document_data.get('query', 'NO_QUERY')}'")
+            
+            if document_data.get('method') in ['requests', 'playwright'] or document_data.get('url'):
+                logger.info("Document qualifies as web document")
+                # This is a web document, process for RAG
+                query = document_data.get('query', '')  # Get query from document if available
+                logger.info(f"Processing web document with query: '{query}'")
+                if query:
+                    web_result = process_web_chunks_for_rag(document_data, query, top_k=5)
+                    web_chunks_results.append(web_result)
+                    logger.info(f"Web chunks processed for document: {document_data.get('doc_id', 'unknown')}")
+                else:
+                    logger.warning(f"Web document has no query, skipping web chunks processing: {document_data.get('doc_id', 'unknown')}")
+            else:
+                logger.info("Document does not qualify as web document")
+        
         logger.info(f"Successfully processed {len(processed_chunks)} legal document embeddings")
-        return {"status": "success", "processed_count": len(processed_chunks)}
+        if web_chunks_results:
+            logger.info(f"Additionally processed {len(web_chunks_results)} web documents for RAG")
+        
+        return {
+            "status": "success", 
+            "processed_count": len(processed_chunks),
+            "web_chunks_processed": len(web_chunks_results)
+        }
         
     except Exception as e:
         logger.error(f"Error processing legal document embeddings: {str(e)}")

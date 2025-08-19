@@ -19,11 +19,9 @@ class InternalAPIClient:
         self.timeout = httpx.Timeout(30.0, connect=10.0)
         
     def _get_base_url(self) -> str:
-        """Get base URL with K8s service discovery"""
-        if os.getenv("KUBERNETES_SERVICE_HOST"):
-            namespace = os.getenv("NAMESPACE", "default")
-            return f"http://legal-chatbot-api.{namespace}.svc.cluster.local:8000"
-        return cfg_settings.INTERNAL_API_BASE
+        """Get base URL - brain calls itself via localhost"""
+        # Brain should always call itself on localhost since it's in same pod
+        return "http://localhost:8000"
     
     async def post(self, endpoint: str, data: Dict[str, Any], retries: int = 1) -> Dict[str, Any]:
         """POST request with retries and error handling"""

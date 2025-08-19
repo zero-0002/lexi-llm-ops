@@ -266,8 +266,8 @@ async def stream_legal_response(conversation_id: str = Query(..., description="C
                         if content == "[DONE]":
                             break
                 else:
-                    if not first_msg_received and now - start_time >= 30:
-                        logger.info("Timeout 30s trước message đầu tiên → completed")
+                    if not first_msg_received and now - start_time >= 45:
+                        logger.info("Timeout 45s trước message đầu tiên → completed")
                         break
                     if first_msg_received and now - last_msg_time >= 10:
                         logger.info("Timeout 10s sau message cuối → completed")

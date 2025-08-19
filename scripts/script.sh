@@ -1,4 +1,21 @@
 
+# check log k8s
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+helm install loki grafana/loki-stack \
+  --namespace logging --create-namespace \
+  --set grafana.enabled=true \
+  --set grafana.adminUser=admin \
+  --set grafana.adminPassword=YourVeryStrongGrafanaPassword123 \
+  --set prometheus.enabled=false
+
+kubectl apply -f helm/charts/dozzle/dozzle-k8s.yaml -n logging
+kubectl delete -f helm/charts/dozzle/dozzle-k8s.yaml -n logging
+kubectl port-forward svc/dozzle-service 8080:8080
+kubectl port-forward svc/loki-grafana 3000:80 -n logging
+
+kubectl port-forward svc/legal-frontend 5173:80 -n application
 # Remove application
 helmfile destroy
 
@@ -24,7 +41,7 @@ kubectl get namespace argocd -o json > ns.json
 kubectl patch application setup-secrets -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
 kubectl delete namespace secrets-management --force --grace-period=0
 #
-kubectl proxy
+kubectl proxy -p 8002
 curl -k -H "Content-Type: application/json" -X PUT --data-binary @ns.json \
 http://127.0.0.1:8002/api/v1/namespaces/argocd/finalize
 
@@ -39,9 +56,11 @@ kubectl get pod curl-test -o yaml | grep -A5 ownerReferences
 # down docker-compose
 docker compose -f docker-compose.yml down
 
+# check env in pod
+kubectl exec -it legal-celery-worker-link-link-65f6dd6c7f-8dgv5 -n application -- env | grep SERPER_API_KEY
+
+
 ### argocd
-
-
 kubectl apply -f helm/charts/argocd/cmp-helmfile-plugin.yaml
 kubectl delete -f helm/charts/argocd/cmp-helmfile-plugin.yaml
 

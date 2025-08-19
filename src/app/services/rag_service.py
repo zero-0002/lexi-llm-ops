@@ -16,7 +16,7 @@ class LegalRAGService:
         messages_col=None
     ):
         self.vector_client = db_manager.qdrant_client
-        self.collection_names = ["chat_questions", "law_corpus_openai"]
+        self.collection_names = ["chat_questions", "legal_documents_collection"]
         self.messages_col = messages_col
         self.__check_collection_exists(self.collection_names)
 

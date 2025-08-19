@@ -144,7 +144,7 @@ export const useChat = () => {
       let accumulatedText = '';
       let updateTimeout = null;
       
-      // 🔧 Debounced update function for smoother UI
+      // 🔧 Optimized streaming update for smooth text display
       const debouncedUpdate = (newText) => {
         if (updateTimeout) clearTimeout(updateTimeout);
         updateTimeout = setTimeout(() => {
@@ -159,14 +159,14 @@ export const useChat = () => {
             }
             return newMessages;
           });
-        }, 16); // 🔧 60fps update rate
+        }, 16); // 🔧 Back to 16ms for smooth streaming (60fps)
       };
       
       // Stream final answer
       await apiClient.streamAnswer(
         conversationId,
         (chunk) => {
-          // onChunk - Smooth text accumulation
+          // onChunk - Smooth text accumulation with immediate update for responsiveness
           accumulatedText += chunk;
           debouncedUpdate(accumulatedText);
         },
@@ -276,7 +276,6 @@ export const useChat = () => {
       return false;
     }
   }, []);
-  console.info('Conversation title updated:', messages);
 
   return {
     conversations,

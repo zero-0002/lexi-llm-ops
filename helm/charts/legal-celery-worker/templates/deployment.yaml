@@ -1,63 +1,60 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "legal-celery-worker.fullname" . }}-{{ .Values.workerType | default "worker" }}
+  name: {{ include "legal-celery-worker.fullname" . }}
   labels:
     {{- include "legal-celery-worker.labels" . | nindent 4 }}
-    worker-type: {{ .Values.workerType | default "worker" }}
+    worker-type: {{ .Values.workerType }}
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "legal-celery-worker.selectorLabels" . | nindent 6 }}
-      worker-type: {{ .Values.workerType | default "worker" }}
+      worker-type: {{ .Values.workerType }}
   template:
     metadata:
       labels:
         {{- include "legal-celery-worker.selectorLabels" . | nindent 8 }}
-        worker-type: {{ .Values.workerType | default "worker" }}
+        worker-type: {{ .Values.workerType }}
     spec:
       serviceAccountName: {{ include "legal-celery-worker.fullname" . }}
       containers:
-        - name: {{ .Chart.Name }}-{{ .Values.workerType | default "worker" }}
+        - name: {{ .Chart.Name }}-{{ .Values.workerType }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - bash
             - -c
             - |
-              echo "🔧 Starting {{ .Values.env.APP_NAME }}..."
-              echo "Worker Type: {{ .Values.workerType | default "worker" }}"
-              echo "Queues: {{ .Values.env.CELERY_QUEUES }}"
+              echo "🔧 Starting {{ .Values.workerType | title }} Worker..."
+              echo "Worker Type: {{ .Values.workerType }}"
+              echo "Queues: {{ .Values.worker.queues }}"
               python /app/wait-for-services.py
-              exec celery -A app.workers.{{ .Values.workerType | default "worker" }}_worker worker \
-                --loglevel={{ .Values.worker.logLevel }} \
-                --pool={{ .Values.worker.pool }} \
-                --queues={{ .Values.env.CELERY_QUEUES }} \
-                --concurrency={{ .Values.worker.concurrency }} \
+              exec celery -A app.workers.{{ .Values.workerType }}_worker worker \
+                --loglevel={{ .Values.worker.logLevel | default "INFO" }} \
+                --pool=prefork \
+                --queues={{ .Values.worker.queues }} \
+                --concurrency={{ .Values.worker.concurrency | default 2 }} \
                 --max-tasks-per-child=1000 \
                 --prefetch-multiplier=1
           env:
-            - name: DOCKER_ENV
-              value: "true"
-            - name: DEBUG
-              value: "true"
-            - name: LOG_LEVEL
-              value: "INFO"
+            # Additional environment variables from values first
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
+            # Core worker settings (override any conflicting values)
+            - name: DOCKER_ENV
+              value: "true"
+            - name: WORKER_TYPE
+              value: "{{ .Values.workerType }}"
+            - name: CELERY_WORKER_TYPE
+              value: "{{ .Values.workerType }}"
+            - name: CELERY_QUEUES
+              value: "{{ .Values.worker.queues }}"
           envFrom:
-            {{- if .Values.envFrom }}
-            {{- toYaml .Values.envFrom | nindent 12 }}
-            {{- else }}
             - secretRef:
                 name: legal-secrets
-            - configMapRef:
-                name: {{ include "legal-celery-worker.fullname" . }}-config
-                optional: true
-            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

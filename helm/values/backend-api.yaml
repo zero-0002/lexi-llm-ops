@@ -7,8 +7,8 @@
 component: api
 
 image:
-  repository: legal-chatbot-backend
-  tag: "dns-fix-v1"
+  repository: tinhnguyen0110/legal-backend-api
+  tag: "latest"
   pullPolicy: Never
 
 replicaCount: 1
@@ -27,12 +27,16 @@ env:
   HOST: "0.0.0.0"
   PORT: "8000"
   
-  # Database connections (non-secret parts)
-  MONGO_URI: "mongodb://root@legal-mongodb.data-service.svc.cluster.local:27017/legaldb"
+  # Database connections (Full K8s cluster DNS names)
+  MONGO_HOST: "legal-mongodb.data-service.svc.cluster.local"
+  MONGO_PORT: "27017"
   MONGO_DATABASE: "legaldb"
   MONGO_USER: "root"
+  MONGO_PASSWORD: "password123"
+  MONGO_AUTH_SOURCE: "admin"
   
-  REDIS_HOST: "10.96.109.108"
+  # Redis with full K8s cluster DNS name (DNS fallback handled in settings.py)
+  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
   REDIS_PORT: "6379"
   REDIS_DB_DEFAULT: "0"
   REDIS_DB_WS: "1"
@@ -40,6 +44,7 @@ env:
   REDIS_DB_CELERY: "3"
   REDIS_DB_RESULT: "4"
   
+  # Qdrant with full K8s cluster DNS name
   QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"
   QDRANT_PORT: "6333"
   QDRANT_COLLECTION: "legal_documents"
@@ -48,7 +53,9 @@ env:
   OPENAI_MODEL: "gpt-3.5-turbo"
   OPENAI_EMBEDDING_MODEL: "text-embedding-ada-002"
   
-  # Celery configuration
+  # Celery configuration with correct Redis DNS
+  CELERY_BROKER_URL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/3"
+  CELERY_RESULT_BACKEND: "redis://legal-redis-master.data-service.svc.cluster.local:6379/4"
   CELERY_TASK_SERIALIZER: "json"
   CELERY_RESULT_SERIALIZER: "json"
   CELERY_ACCEPT_CONTENT: "application/json"
@@ -144,7 +151,7 @@ serviceAccount:
 networkPolicy:
   enabled: false
 
-# Database Connections
+# Database Connections (K8s service names with DNS)
 mongodb:
   url: "mongodb://legal-mongodb.data-service.svc.cluster.local:27017/legal_db"
   host: "legal-mongodb.data-service.svc.cluster.local"
@@ -154,8 +161,8 @@ mongodb:
   password: ""
 
 redis:
-  url: "redis://10.96.109.108:6379"
-  host: "10.96.109.108"
+  url: "redis://legal-redis-master.data-service.svc.cluster.local:6379"
+  host: "legal-redis-master.data-service.svc.cluster.local"
   port: "6379"
   password: ""
 

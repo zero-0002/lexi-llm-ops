@@ -28,7 +28,10 @@ services:
       - mongodb_dev_data:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
-      - legal-dev-network
+      legal-dev-network:
+        aliases:
+          - legal-mongodb
+          - mongodb
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -45,7 +48,11 @@ services:
     volumes:
       - redis_dev_data:/data
     networks:
-      - legal-dev-network
+      legal-dev-network:
+        aliases:
+          - legal-redis-master
+          - legal-redis
+          - redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -63,7 +70,10 @@ services:
     volumes:
       - qdrant_dev_data:/qdrant/storage
     networks:
-      - legal-dev-network
+      legal-dev-network:
+        aliases:
+          - legal-qdrant
+          - qdrant
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
       interval: 15s
@@ -86,14 +96,14 @@ services:
       DEBUG: "true"
       LOG_LEVEL: "DEBUG"
       
-      # Database connections
-      MONGO_URI: "mongodb://admin:password123@mongodb:27017/legal_chatbot_db?authSource=admin"
-      REDIS_URL: "redis://redis:6379/0"
-      REDIS_WS_URL: "redis://redis:6379/1"
-      REDIS_RETRIEVAL_URL: "redis://redis:6379/2"
-      CELERY_BROKER_URL: "redis://redis:6379/3"
-      CELERY_RESULT_BACKEND: "redis://redis:6379/4"
-      QDRANT_URL: "http://qdrant:6333"
+      # Database connections - K8s simulation
+      MONGO_URI: "mongodb://admin:password123@legal-mongodb:27017/legal_chatbot_db?authSource=admin"
+      REDIS_URL: "redis://legal-redis-master:6379/0"
+      REDIS_WS_URL: "redis://legal-redis-master:6379/1"
+      REDIS_RETRIEVAL_URL: "redis://legal-redis-master:6379/2"
+      CELERY_BROKER_URL: "redis://legal-redis-master:6379/3"
+      CELERY_RESULT_BACKEND: "redis://legal-redis-master:6379/4"
+      QDRANT_URL: "http://legal-qdrant:6333"
       
       # API Keys (load from .env)
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
@@ -153,14 +163,14 @@ services:
       DEBUG: "true"
       LOG_LEVEL: "DEBUG"
       
-      # Database connections
-      MONGO_URI: "mongodb://admin:password123@mongodb:27017/legal_chatbot_db?authSource=admin"
-      REDIS_URL: "redis://redis:6379/0"
-      REDIS_WS_URL: "redis://redis:6379/1"
-      REDIS_RETRIEVAL_URL: "redis://redis:6379/2"
-      CELERY_BROKER_URL: "redis://redis:6379/3"
-      CELERY_RESULT_BACKEND: "redis://redis:6379/4"
-      QDRANT_URL: "http://qdrant:6333"
+      # Database connections - K8s simulation
+      MONGO_URI: "mongodb://admin:password123@legal-mongodb:27017/legal_chatbot_db?authSource=admin"
+      REDIS_URL: "redis://legal-redis-master:6379/0"
+      REDIS_WS_URL: "redis://legal-redis-master:6379/1"
+      REDIS_RETRIEVAL_URL: "redis://legal-redis-master:6379/2"
+      CELERY_BROKER_URL: "redis://legal-redis-master:6379/3"
+      CELERY_RESULT_BACKEND: "redis://legal-redis-master:6379/4"
+      QDRANT_URL: "http://legal-qdrant:6333"
       
       # API Keys
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
@@ -289,11 +299,38 @@ services:
     ports:
       - "8082:8081"
     environment:
-      REDIS_HOSTS: "local:redis:6379"
+      REDIS_HOSTS: "local:legal-redis-master:6379"
     networks:
       - legal-dev-network
     depends_on:
       - redis
+
+  # ===================
+  # DNS TEST SERVICE - K8s Simulation
+  # ===================
+  
+  dns-test-service:
+    image: alpine:latest
+    container_name: legal-dns-test
+    restart: "no"
+    command: >
+      sh -c "
+        echo '🔍 DNS Test Service - K8s Simulation';
+        echo 'Testing DNS resolution...';
+        nslookup legal-redis-master;
+        nslookup legal-mongodb;
+        nslookup legal-qdrant;
+        echo 'Sleeping indefinitely...';
+        tail -f /dev/null;
+      "
+    networks:
+      legal-dev-network:
+        aliases:
+          - dns-test
+    depends_on:
+      - redis
+      - mongodb
+      - qdrant
 
 # ===================
 # VOLUMES

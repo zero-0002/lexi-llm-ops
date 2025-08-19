@@ -11,7 +11,7 @@ import uuid
 from .requests_tool import extract_with_requests 
 from app.utils.logging_simplified import get_logger, consolidate_extraction_logs
 # from app.tasks.embedding_tasks import process_document_and_select_chunks  # REMOVED: File deleted in cleanup
-from app.tasks.legal_embedding_tasks import process_legal_document_embedding  # Updated import
+from app.tasks.legal_embedding_tasks import process_legal_document_embedding  # Back to original task
 from app.config.database import get_database_manager
 
 logger = logging.getLogger(__name__)
@@ -171,10 +171,13 @@ class ExtractionService:
             thread_logger.info(f"📤 Đang gửi document {document.doc_id} lên Redis...")
             
             document_data = asdict(document)
+            thread_logger.info(f"🔍 Before adding query: {list(document_data.keys())}")
+            document_data['query'] = query  # Add query to document data
+            thread_logger.info(f"🔍 After adding query: query='{query}', has_query={query in document_data}")
             self.redis_client.delete(self.document_queue)  # Xóa nếu đã tồn tại
             self.redis_client.lpush(self.document_queue, json.dumps(document_data))
 
-            # Updated to use legal embedding task
+            # Use original legal embedding task with enhanced processing
             task_result = process_legal_document_embedding.delay([document_data], 32)
             
             thread_logger.info(f"✅ Document {document.doc_id} đã gửi lên Redis")

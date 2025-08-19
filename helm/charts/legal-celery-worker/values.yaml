@@ -14,10 +14,10 @@ strategy:
     maxUnavailable: 1
     maxSurge: 1
 
-# Worker-specific configuration
+# Worker-specific configuration (will be overridden by individual values files)
 worker:
-  type: rag
-  queues: "rag_queue,embed_queue"
+  type: "rag"
+  queues: "rag_queue"
   concurrency: 2
   logLevel: INFO
   maxTasksPerChild: 1000
@@ -32,9 +32,9 @@ env:
   DEBUG: "false"
   LOG_LEVEL: "INFO"
   
-  # Celery configuration
+  # Celery configuration (will be overridden by individual values files)
   CELERY_WORKER_TYPE: "rag"
-  CELERY_QUEUES: "rag_queue,embed_queue"
+  CELERY_QUEUES: "rag_queue"
   CELERY_CONCURRENCY: "2"
   CELERY_LOG_LEVEL: "INFO"
   CELERY_MAX_TASKS_PER_CHILD: "1000"

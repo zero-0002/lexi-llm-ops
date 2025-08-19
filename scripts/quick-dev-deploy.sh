@@ -135,7 +135,21 @@ print_success "Helmfile plugin configured and ArgoCD restarted"
 print_step "🚀 Step 4: Deploying applications..."
 kubectl apply -f ../argocd-manifests/root-app.yaml
 
-# Step 4: Quick status check
+# Step 4: Deploy monitoring separately (optional for dev)
+read -p "Deploy monitoring stack (Prometheus/Grafana/Loki)? [y/N]: " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    print_step "📊 Step 4b: Deploying monitoring stack..."
+    if kubectl apply -f ../argocd-manifests/monitoring-app.yaml; then
+        print_success "Monitoring application deployed"
+    else
+        print_warning "Monitoring deployment failed (non-critical for development)"
+    fi
+else
+    print_step "Skipping monitoring deployment for faster dev setup"
+fi
+
+# Step 5: Quick status check
 print_step "📊 Step 5: Checking deployment status..."
 sleep 30
 

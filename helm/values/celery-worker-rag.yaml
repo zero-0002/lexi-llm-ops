@@ -4,8 +4,8 @@
 workerType: rag
 
 image:
-  repository: legal-chatbot-backend
-  tag: dns-fix-v1
+  repository: tinhnguyen0110/legal-backend-api
+  tag: latest
   pullPolicy: Never
 
 worker:
@@ -26,3 +26,24 @@ env:
   APP_NAME: "Legal RAG Worker"
   WORKER_TYPE: "rag"
   CELERY_QUEUES: "rag_queue"
+  # Redis Configuration - No password  
+  REDIS_HOST: "legal-redis-master.data-service.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""  # Override secret - Redis has no password configured
+  REDIS_DB: "3"
+  # Celery Configuration - No password for Redis
+  CELERY_BROKER_URL: "redis://legal-redis-master.data-service.svc.cluster.local:6379/3"
+  CELERY_RESULT_BACKEND: "redis://legal-redis-master.data-service.svc.cluster.local:6379/3"
+  # MongoDB Configuration - Both formats for compatibility
+  MONGO_HOST: "legal-mongodb.data-service.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_USER: "root"  # Override default "admin" with "root"
+  MONGO_DB_NAME: "legal_retrieval"  # Override default "chat_db"
+  MONGODB_USERNAME: "root"
+  MONGODB_DATABASE: "legal_retrieval"
+  MONGO_PASSWORD: "password123"  # Direct value from decoded secret
+  MONGO_URL: "mongodb://root:password123@legal-mongodb.data-service.svc.cluster.local:27017/legal_retrieval"
+  # Qdrant Configuration
+  QDRANT_HOST: "legal-qdrant.data-service.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  QDRANT_URL: "http://legal-qdrant.data-service.svc.cluster.local:6333"
