@@ -6,6 +6,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose_Ready-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployment_Ready-326CE5?style=for-the-badge&logo=kubernetes)](https://kubernetes.io)
 
+
+**➡️ [Notion Live Tracker – Architecture, Kanban...](#-https://successful-vanadium-dde.notion.site/flow-24e2418089ee80a6b652d76b53e2abcb)**
 ---
 
 ## 📋 Table of Contents
