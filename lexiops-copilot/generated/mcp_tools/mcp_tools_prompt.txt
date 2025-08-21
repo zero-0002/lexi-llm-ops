@@ -1,0 +1,553 @@
+Available Kubernetes Tools:
+
+**k8s_apis**:
+  Description: List all available APIs in the Kubernetes cluster.
+
+**k8s_crds**:
+  Description: List all Custom Resource Definitions (CRDs) in the Kubernetes cluster.
+
+**k8s_get**:
+  Description: Fetch any Kubernetes object (or list) as JSON string. Pass name="" to list the collection and namespace="" to get the resource in all namespaces.
+
+:param resource: The resource type (e.g., pods, deployments).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource.
+:return: The JSON representation of the resource.
+  Parameters:
+    - resource (required): 
+    - name (required): 
+    - namespace (required): 
+
+**k8s_rollout_status**:
+  Description: Get the status of a rollout for a deployment, daemonset, or statefulset.
+
+:param resource_type: The type of resource (deployment, daemonset, statefulset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The status of the rollout.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+
+**k8s_rollout_history**:
+  Description: Get the rollout history for a deployment, daemonset, or statefulset.
+
+:param resource_type: The type of resource (deployment, daemonset, statefulset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param revision: The specific revision to get. If not specified, gets all revisions.
+:return: The rollout history.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+    - revision (optional): 
+
+**k8s_top_nodes**:
+  Description: Display resource usage (CPU/memory) of nodes.
+
+:param sort_by: Field to sort by (cpu or memory).
+:return: The resource usage of nodes.
+  Parameters:
+    - sort_by (optional): 
+
+**k8s_top_pods**:
+  Description: Display resource usage (CPU/memory) of pods.
+
+:param namespace: The namespace to get pods from. If not specified, uses the default namespace.
+:param all_namespaces: Whether to get pods from all namespaces.
+:param sort_by: Field to sort by (cpu or memory).
+:param selector: Label selector to filter pods.
+:return: The resource usage of pods.
+  Parameters:
+    - namespace (optional): 
+    - all_namespaces (optional): 
+    - sort_by (optional): 
+    - selector (optional): 
+
+**k8s_describe**:
+  Description: Show detailed information about a specific resource or group of resources.
+
+:param resource_type: The type of resource to describe (e.g., pods, deployments).
+:param name: The name of the resource to describe. If not specified, describes resources matching the selector.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param selector: Label selector to filter resources (e.g., "app=nginx").
+:param all_namespaces: Whether to describe resources in all namespaces.
+:return: The detailed description of the resource(s).
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - namespace (optional): 
+    - selector (optional): 
+    - all_namespaces (optional): 
+
+**k8s_logs**:
+  Description: Print the logs for a container in a pod.
+
+:param pod_name: The name of the pod.
+:param container: The name of the container in the pod. If not specified, uses the first container.
+:param namespace: The namespace of the pod. If not specified, uses the default namespace.
+:param tail: The number of lines from the end of the logs to show. If not specified, shows all lines.
+:param previous: Whether to show the logs for the previous instance of the container.
+:param since: Only return logs newer than a relative duration like 5s, 2m, or 3h, or an absolute timestamp.
+:param timestamps: Whether to include timestamps on each line.
+:param follow: Whether to follow the logs (stream in real-time).
+:return: The logs of the container.
+  Parameters:
+    - pod_name (required): 
+    - container (optional): 
+    - namespace (optional): 
+    - tail (optional): 
+    - previous (optional): 
+    - since (optional): 
+    - timestamps (optional): 
+    - follow (optional): 
+
+**k8s_events**:
+  Description: List events in the cluster.
+
+:param namespace: The namespace to get events from. If not specified, uses the default namespace.
+:param all_namespaces: Whether to get events from all namespaces.
+:param field_selector: Field selector to filter events (e.g., "involvedObject.kind=Pod").
+:param resource_type: The type of resource to get events for (e.g., pods, deployments).
+:param resource_name: The name of the resource to get events for.
+:param sort_by: Field to sort by (e.g., "lastTimestamp").
+:param watch: Whether to watch for new events.
+:return: The events.
+  Parameters:
+    - namespace (optional): 
+    - all_namespaces (optional): 
+    - field_selector (optional): 
+    - resource_type (optional): 
+    - resource_name (optional): 
+    - sort_by (optional): 
+    - watch (optional): 
+
+**k8s_auth_can_i**:
+  Description: Check whether an action is allowed.
+
+:param verb: The verb to check (e.g., get, list, create, update, delete).
+:param resource: The resource to check (e.g., pods, deployments).
+:param subresource: The subresource to check (e.g., log, status).
+:param namespace: The namespace to check in. If not specified, checks in the default namespace.
+:param name: The name of the resource to check.
+:return: Whether the action is allowed.
+  Parameters:
+    - verb (required): 
+    - resource (required): 
+    - subresource (optional): 
+    - namespace (optional): 
+    - name (optional): 
+
+**k8s_auth_whoami**:
+  Description: Show the subject that you are currently authenticated as.
+
+:return: The current user information.
+
+**k8s_create**:
+  Description: Create a Kubernetes resource from YAML/JSON content.
+
+:param yaml_content: The YAML or JSON content of the resource to create.
+:param namespace: The namespace to create the resource in. If not provided, uses the namespace in the YAML or the default namespace.
+:return: The JSON representation of the created resource.
+  Parameters:
+    - yaml_content (required): 
+    - namespace (optional): 
+
+**k8s_expose**:
+  Description: Expose a resource as a new Kubernetes service.
+
+:param resource_type: The type of resource to expose (e.g., deployment, pod, replicaset, service).
+:param resource_name: The name of the resource to expose.
+:param port: The port that the service should serve on.
+:param target_port: The port on the resource that the service should direct traffic to.
+:param name: The name for the new service. If not specified, the resource name is used.
+:param protocol: The network protocol for the service. Default is TCP.
+:param type: The type of service to create (ClusterIP, NodePort, LoadBalancer). Default is ClusterIP.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param labels: Labels to apply to the service.
+:param selector: Selector for the service. If not specified, uses the resource's labels.
+:return: The JSON representation of the created service.
+  Parameters:
+    - resource_type (required): 
+    - resource_name (required): 
+    - port (required): 
+    - target_port (optional): 
+    - name (optional): 
+    - protocol (optional): 
+    - type (optional): 
+    - namespace (optional): 
+    - labels (optional): 
+    - selector (optional): 
+
+**k8s_run**:
+  Description: Run a specific image in the cluster by creating a deployment.
+
+:param image: The Docker image to run.
+:param name: The name for the deployment and pods.
+:param namespace: The namespace to run in. If not specified, uses the default namespace.
+:param replicas: The number of replicas to run. Default is 1.
+:param port: The port the container exposes, if any.
+:param env: Environment variables as a dictionary of name-value pairs.
+:param labels: Labels to apply to the deployment and pods.
+:param limits: Resource limits as a dictionary (e.g., {"cpu": "100m", "memory": "128Mi"}).
+:param requests: Resource requests as a dictionary (e.g., {"cpu": "100m", "memory": "128Mi"}).
+:return: The JSON representation of the created deployment.
+  Parameters:
+    - image (required): 
+    - name (required): 
+    - namespace (optional): 
+    - replicas (optional): 
+    - port (optional): 
+    - env (optional): 
+    - labels (optional): 
+    - limits (optional): 
+    - requests (optional): 
+
+**k8s_set_resources**:
+  Description: Set resource limits and requests for containers in a pod, deployment, etc.
+
+:param resource_type: The type of resource to modify (e.g., deployment, pod, statefulset).
+:param resource_name: The name of the resource to modify.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param containers: List of container names to modify. If None, modifies all containers.
+:param limits: Resource limits as a dictionary (e.g., {"cpu": "100m", "memory": "128Mi"}).
+:param requests: Resource requests as a dictionary (e.g., {"cpu": "100m", "memory": "128Mi"}).
+:return: The JSON representation of the modified resource.
+  Parameters:
+    - resource_type (required): 
+    - resource_name (required): 
+    - namespace (optional): 
+    - containers (optional): 
+    - limits (optional): 
+    - requests (optional): 
+
+**k8s_set_image**:
+  Description: Set the image for a container in a pod, deployment, etc.
+
+:param resource_type: The type of resource to modify (e.g., deployment, pod, statefulset).
+:param resource_name: The name of the resource to modify.
+:param container: The name of the container to modify.
+:param image: The new image to use.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The JSON representation of the modified resource.
+  Parameters:
+    - resource_type (required): 
+    - resource_name (required): 
+    - container (required): 
+    - image (required): 
+    - namespace (optional): 
+
+**k8s_set_env**:
+  Description: Set environment variables for a container in a pod, deployment, etc.
+
+:param resource_type: The type of resource to modify (e.g., deployment, pod, statefulset).
+:param resource_name: The name of the resource to modify.
+:param container: The name of the container to modify.
+:param env_dict: Dictionary of environment variables to set.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The JSON representation of the modified resource.
+  Parameters:
+    - resource_type (required): 
+    - resource_name (required): 
+    - container (required): 
+    - env_dict (required): 
+    - namespace (optional): 
+
+**k8s_rollout_undo**:
+  Description: Undo a rollout for a deployment, daemonset, or statefulset.
+
+:param resource_type: The type of resource (deployment, daemonset, statefulset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param to_revision: The revision to roll back to. If not specified, rolls back to the previous revision.
+:return: The result of the rollback operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+    - to_revision (optional): 
+
+**k8s_rollout_restart**:
+  Description: Restart a rollout for a deployment, daemonset, or statefulset.
+
+:param resource_type: The type of resource (deployment, daemonset, statefulset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the restart operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+
+**k8s_rollout_pause**:
+  Description: Pause a rollout for a deployment or daemonset.
+
+:param resource_type: The type of resource (deployment, daemonset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the pause operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+
+**k8s_rollout_resume**:
+  Description: Resume a rollout for a deployment or daemonset.
+
+:param resource_type: The type of resource (deployment, daemonset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the resume operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+
+**k8s_scale**:
+  Description: Scale a deployment, replicaset, statefulset, or replication controller.
+
+:param resource_type: The type of resource to scale (deployment, replicaset, statefulset, replicationcontroller).
+:param name: The name of the resource to scale.
+:param replicas: The number of replicas to scale to.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the scaling operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - replicas (required): 
+    - namespace (optional): 
+
+**k8s_autoscale**:
+  Description: Create a horizontal pod autoscaler for a deployment, replicaset, statefulset, or replication controller.
+
+:param resource_type: The type of resource to autoscale (deployment, replicaset, statefulset, replicationcontroller).
+:param name: The name of the resource to autoscale.
+:param min_replicas: The minimum number of replicas.
+:param max_replicas: The maximum number of replicas.
+:param cpu_percent: The target CPU utilization percentage. If not specified, uses the default (80%).
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the autoscaling operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - min_replicas (required): 
+    - max_replicas (required): 
+    - cpu_percent (optional): 
+    - namespace (optional): 
+
+**k8s_cordon**:
+  Description: Mark a node as unschedulable.
+
+:param node_name: The name of the node to cordon.
+:return: The result of the cordon operation.
+  Parameters:
+    - node_name (required): 
+
+**k8s_uncordon**:
+  Description: Mark a node as schedulable.
+
+:param node_name: The name of the node to uncordon.
+:return: The result of the uncordon operation.
+  Parameters:
+    - node_name (required): 
+
+**k8s_drain**:
+  Description: Drain a node in preparation for maintenance.
+
+:param node_name: The name of the node to drain.
+:param ignore_daemonsets: Whether to ignore DaemonSet-managed pods.
+:param delete_local_data: Whether to delete pods with local storage.
+:param force: Whether to continue even if there are pods not managed by a ReplicationController, ReplicaSet, Job, DaemonSet or StatefulSet.
+:param grace_period: Period of time in seconds given to each pod to terminate gracefully. If negative, the default value specified in the pod will be used.
+
+:return: The result of the drain operation.
+  Parameters:
+    - node_name (required): 
+    - ignore_daemonsets (optional): 
+    - delete_local_data (optional): 
+    - force (optional): 
+    - grace_period (optional): 
+
+**k8s_taint**:
+  Description: Update the taints on one or more nodes.
+
+:param node_name: The name of the node to taint.
+:param key: The taint key to add/remove.
+:param value: The taint value.
+:param effect: The taint effect (NoSchedule, PreferNoSchedule, NoExecute).
+:param overwrite: If true, overwrite any existing taint with the same key.
+:return: The result of the taint operation.
+  Parameters:
+    - node_name (required): 
+    - key (required): 
+    - value (optional): 
+    - effect (optional): 
+    - overwrite (optional): 
+
+**k8s_untaint**:
+  Description: Remove the taints from one or more nodes.
+
+:param node_name: The name of the node to untaint.
+:param key: The taint key to remove.
+:param effect: The taint effect (NoSchedule, PreferNoSchedule, NoExecute).
+:return: The result of the untaint operation.
+  Parameters:
+    - node_name (required): 
+    - key (required): 
+    - effect (optional): 
+
+**k8s_exec_command**:
+  Description: Execute a command in a container.
+
+:param pod_name: The name of the pod.
+:param command: The command to execute.
+:param container: The name of the container in the pod. If not specified, uses the first container.
+:param namespace: The namespace of the pod. If not specified, uses the default namespace.
+:param stdin: Whether to pass stdin to the container.
+:param tty: Whether to allocate a TTY.
+:param timeout: The timeout for the command execution in seconds.
+:return: The output of the command.
+  Parameters:
+    - pod_name (required): 
+    - command (required): 
+    - container (optional): 
+    - namespace (optional): 
+    - stdin (optional): 
+    - tty (optional): 
+    - timeout (optional): 
+
+**k8s_port_forward**:
+  Description: Forward one or more local ports to a pod.
+
+:param resource_type: The type of resource to port-forward to (e.g., pod, service, deployment).
+:param name: The name of the resource.
+:param ports: The ports to forward (e.g., ["8080:80"] to forward local port 8080 to port 80 in the pod).
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param address: The IP address to listen on (default: 127.0.0.1).
+:return: Information about the port-forward process.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - ports (required): 
+    - namespace (optional): 
+    - address (optional): 
+
+**k8s_cp**:
+  Description: Copy files and directories to and from containers.
+
+:param src_path: The source path (local path or pod path in the format pod_name:path).
+:param dst_path: The destination path (local path or pod path in the format pod_name:path).
+:param container: The container name when copying to or from a pod. If not specified, uses the first container.
+:param namespace: The namespace of the pod. If not specified, uses the default namespace.
+:return: The result of the copy operation.
+  Parameters:
+    - src_path (required): 
+    - dst_path (required): 
+    - container (optional): 
+    - namespace (optional): 
+
+**k8s_apply**:
+  Description: Apply a configuration to a resource by file content or file path.
+
+:param yaml_content: The YAML content to apply.
+:param namespace: The namespace to apply the configuration to. If not specified, uses the default namespace.
+:return: The result of the apply operation.
+  Parameters:
+    - yaml_content (optional): 
+    - namespace (optional): 
+
+**k8s_patch**:
+  Description: Update fields of a resource using a patch.
+
+:param resource_type: The type of resource to patch (e.g., pods, deployments).
+:param name: The name of the resource to patch.
+:param patch_data: The patch data as a JSON string or dictionary.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the patch operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - patch_data (required): 
+    - namespace (optional): 
+
+**k8s_label**:
+  Description: Update the labels on a resource.
+
+:param resource_type: The type of resource to label (e.g., pods, deployments).
+:param name: The name of the resource to label. If not specified, labels resources matching the selector.
+:param labels: The labels to add or update as a dictionary or comma-separated string (e.g., "key1=value1,key2=value2").
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param selector: Label selector to filter resources (e.g., "app=nginx").
+:param all_namespaces: Whether to label resources in all namespaces.
+:param overwrite: If true, overwrite existing labels.
+:param resource_version: Only update if the resource version matches.
+:param dry_run: If true, only print the object that would be sent, without sending it.
+:return: The result of the label operation.
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - labels (optional): 
+    - namespace (optional): 
+    - selector (optional): 
+    - all_namespaces (optional): 
+    - overwrite (optional): 
+    - resource_version (optional): 
+    - dry_run (optional): 
+
+**k8s_annotate**:
+  Description: Update the annotations on a resource.
+
+:param resource_type: The type of resource to annotate (e.g., pods, deployments).
+:param name: The name of the resource to annotate. If not specified, annotates resources matching the selector.
+:param annotations: The annotations to add or update as a dictionary or comma-separated string (e.g., "key1=value1,key2=value2").
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param selector: Label selector to filter resources (e.g., "app=nginx").
+:param all_namespaces: Whether to annotate resources in all namespaces.
+:param overwrite: If true, overwrite existing annotations.
+:param resource_version: Only update if the resource version matches.
+:param dry_run: If true, only print the object that would be sent, without sending it.
+:return: The result of the annotate operation.
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - annotations (optional): 
+    - namespace (optional): 
+    - selector (optional): 
+    - all_namespaces (optional): 
+    - overwrite (optional): 
+    - resource_version (optional): 
+    - dry_run (optional): 
+
+**k8s_delete**:
+  Description: Delete Kubernetes resources by name, label selector, or field selector.
+
+:param resource_type: The type of resource to delete (e.g., pods, deployments).
+:param name: The name of the resource to delete. If not specified, deletes resources matching the selectors.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param label_selector: Label selector to filter resources (e.g., "app=nginx").
+:param field_selector: Field selector to filter resources (e.g., "metadata.name=nginx").
+:param all_namespaces: Whether to delete resources in all namespaces.
+:param cascade: Whether to cascade the deletion to dependent resources.
+:param grace_period: The grace period for the deletion in seconds.
+:return: The result of the deletion operation.
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - namespace (optional): 
+    - label_selector (optional): 
+    - field_selector (optional): 
+    - all_namespaces (optional): 
+    - cascade (optional): 
+    - grace_period (optional): 
+
+**kubectl**:
+  Description: Run a kubectl command and return the output.
+  Parameters:
+    - command (required): 
+
+**helm**:
+  Description: Run a helm command and return the output.
+  Parameters:
+    - command (required): 

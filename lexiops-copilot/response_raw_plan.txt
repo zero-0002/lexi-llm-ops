@@ -1,0 +1,12 @@
+{
+  "thought": "The user wants a listing of all pods. This is a read operation for Kubernetes resources. The most appropriate tool is k8s_get to fetch resources of type pods. Since no namespace is specified, I will assume all namespaces and set namespace to 'all'. The resource_type parameter should be 'pods'.",
+  "tool_calls": [
+    {
+      "name": "k8s_get",
+      "args": {
+        "resource_type": "pods",
+        "namespace": "all"
+      }
+    }
+  ]
+}

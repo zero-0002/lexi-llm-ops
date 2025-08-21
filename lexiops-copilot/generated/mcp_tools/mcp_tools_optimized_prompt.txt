@@ -1,0 +1,163 @@
+ESSENTIAL KUBERNETES TOOLS:
+
+**k8s_get**:
+  Description: Fetch any Kubernetes object (or list) as JSON string. Pass name="" to list the collection and namespace="" to get the resource in all namespaces.
+
+:param resource: The resource type (e.g., pods, deployments).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource.
+:return: The JSON representation of the resource.
+  Parameters:
+    - resource (required): 
+    - name (required): 
+    - namespace (required): 
+
+**k8s_rollout_status**:
+  Description: Get the status of a rollout for a deployment, daemonset, or statefulset.
+
+:param resource_type: The type of resource (deployment, daemonset, statefulset).
+:param name: The name of the resource.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The status of the rollout.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - namespace (optional): 
+
+**k8s_top_pods**:
+  Description: Display resource usage (CPU/memory) of pods.
+
+:param namespace: The namespace to get pods from. If not specified, uses the default namespace.
+:param all_namespaces: Whether to get pods from all namespaces.
+:param sort_by: Field to sort by (cpu or memory).
+:param selector: Label selector to filter pods.
+:return: The resource usage of pods.
+  Parameters:
+    - namespace (optional): 
+    - all_namespaces (optional): 
+    - sort_by (optional): 
+    - selector (optional): 
+
+**k8s_describe**:
+  Description: Show detailed information about a specific resource or group of resources.
+
+:param resource_type: The type of resource to describe (e.g., pods, deployments).
+:param name: The name of the resource to describe. If not specified, describes resources matching the selector.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param selector: Label selector to filter resources (e.g., "app=nginx").
+:param all_namespaces: Whether to describe resources in all namespaces.
+:return: The detailed description of the resource(s).
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - namespace (optional): 
+    - selector (optional): 
+    - all_namespaces (optional): 
+
+**k8s_logs**:
+  Description: Print the logs for a container in a pod.
+
+:param pod_name: The name of the pod.
+:param container: The name of the container in the pod. If not specified, uses the first container.
+:param namespace: The namespace of the pod. If not specified, uses the default namespace.
+:param tail: The number of lines from the end of the logs to show. If not specified, shows all lines.
+:param previous: Whether to show the logs for the previous instance of the container.
+:param since: Only return logs newer than a relative duration like 5s, 2m, or 3h, or an absolute timestamp.
+:param timestamps: Whether to include timestamps on each line.
+:param follow: Whether to follow the logs (stream in real-time).
+:return: The logs of the container.
+  Parameters:
+    - pod_name (required): 
+    - container (optional): 
+    - namespace (optional): 
+    - tail (optional): 
+    - previous (optional): 
+    - since (optional): 
+    - timestamps (optional): 
+    - follow (optional): 
+
+**k8s_events**:
+  Description: List events in the cluster.
+
+:param namespace: The namespace to get events from. If not specified, uses the default namespace.
+:param all_namespaces: Whether to get events from all namespaces.
+:param field_selector: Field selector to filter events (e.g., "involvedObject.kind=Pod").
+:param resource_type: The type of resource to get events for (e.g., pods, deployments).
+:param resource_name: The name of the resource to get events for.
+:param sort_by: Field to sort by (e.g., "lastTimestamp").
+:param watch: Whether to watch for new events.
+:return: The events.
+  Parameters:
+    - namespace (optional): 
+    - all_namespaces (optional): 
+    - field_selector (optional): 
+    - resource_type (optional): 
+    - resource_name (optional): 
+    - sort_by (optional): 
+    - watch (optional): 
+
+**k8s_create**:
+  Description: Create a Kubernetes resource from YAML/JSON content.
+
+:param yaml_content: The YAML or JSON content of the resource to create.
+:param namespace: The namespace to create the resource in. If not provided, uses the namespace in the YAML or the default namespace.
+:return: The JSON representation of the created resource.
+  Parameters:
+    - yaml_content (required): 
+    - namespace (optional): 
+
+**k8s_scale**:
+  Description: Scale a deployment, replicaset, statefulset, or replication controller.
+
+:param resource_type: The type of resource to scale (deployment, replicaset, statefulset, replicationcontroller).
+:param name: The name of the resource to scale.
+:param replicas: The number of replicas to scale to.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:return: The result of the scaling operation.
+  Parameters:
+    - resource_type (required): 
+    - name (required): 
+    - replicas (required): 
+    - namespace (optional): 
+
+**k8s_apply**:
+  Description: Apply a configuration to a resource by file content or file path.
+
+:param yaml_content: The YAML content to apply.
+:param namespace: The namespace to apply the configuration to. If not specified, uses the default namespace.
+:return: The result of the apply operation.
+  Parameters:
+    - yaml_content (optional): 
+    - namespace (optional): 
+
+**k8s_delete**:
+  Description: Delete Kubernetes resources by name, label selector, or field selector.
+
+:param resource_type: The type of resource to delete (e.g., pods, deployments).
+:param name: The name of the resource to delete. If not specified, deletes resources matching the selectors.
+:param namespace: The namespace of the resource. If not specified, uses the default namespace.
+:param label_selector: Label selector to filter resources (e.g., "app=nginx").
+:param field_selector: Field selector to filter resources (e.g., "metadata.name=nginx").
+:param all_namespaces: Whether to delete resources in all namespaces.
+:param cascade: Whether to cascade the deletion to dependent resources.
+:param grace_period: The grace period for the deletion in seconds.
+:return: The result of the deletion operation.
+  Parameters:
+    - resource_type (required): 
+    - name (optional): 
+    - namespace (optional): 
+    - label_selector (optional): 
+    - field_selector (optional): 
+    - all_namespaces (optional): 
+    - cascade (optional): 
+    - grace_period (optional): 
+
+**kubectl**:
+  Description: Run a kubectl command and return the output.
+  Parameters:
+    - command (required): 
+
+**helm**:
+  Description: Run a helm command and return the output.
+  Parameters:
+    - command (required): 

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "chat-workflow",
+    "config": {
+      "steps\\event-steps\\response-handler.step.py": {
+        "x": -600,
+        "y": 51
+      },
+      "steps\\api-steps\\api-get-response.step.py": {
+        "x": 868,
+        "y": -132
+      },
+      "steps\\api-steps\\api-chat.step.py": {
+        "x": 325,
+        "y": -121
+      },
+      "steps\\event-steps\\openai-processor.step.py": {
+        "x": 290,
+        "y": 131
+      }
+    }
+  }
+]

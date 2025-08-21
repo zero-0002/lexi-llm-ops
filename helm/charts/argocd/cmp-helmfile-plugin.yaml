@@ -54,6 +54,8 @@ data:
             echo "===== [GENERATE] Start Processing =====" >&2
             echo "ARGOCD_APP_NAME: $ARGOCD_APP_NAME" >&2
             echo "HELM_SELECTOR: $HELM_SELECTOR" >&2
+            echo "TIMESTAMP: $(date +%s)" >&2
+            echo "CACHE_BUST: $RANDOM" >&2
             
             # Set Helm and Helmfile timeouts
             export HELM_TIMEOUT="300s"

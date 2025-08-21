@@ -1,0 +1,337 @@
+[
+  {
+    "name": "k8s_get",
+    "description": "Fetch any Kubernetes object (or list) as JSON string. Pass name=\"\" to list the collection and namespace=\"\" to get the resource in all namespaces.\n\n:param resource: The resource type (e.g., pods, deployments).\n:param name: The name of the resource.\n:param namespace: The namespace of the resource.\n:return: The JSON representation of the resource.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "resource",
+        "name",
+        "namespace"
+      ]
+    }
+  },
+  {
+    "name": "k8s_rollout_status",
+    "description": "Get the status of a rollout for a deployment, daemonset, or statefulset.\n\n:param resource_type: The type of resource (deployment, daemonset, statefulset).\n:param name: The name of the resource.\n:param namespace: The namespace of the resource. If not specified, uses the default namespace.\n:return: The status of the rollout.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "resource_type",
+        "name"
+      ]
+    }
+  },
+  {
+    "name": "k8s_top_pods",
+    "description": "Display resource usage (CPU/memory) of pods.\n\n:param namespace: The namespace to get pods from. If not specified, uses the default namespace.\n:param all_namespaces: Whether to get pods from all namespaces.\n:param sort_by: Field to sort by (cpu or memory).\n:param selector: Label selector to filter pods.\n:return: The resource usage of pods.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": ""
+        },
+        "all_namespaces": {
+          "type": "string",
+          "description": ""
+        },
+        "sort_by": {
+          "type": "string",
+          "description": ""
+        },
+        "selector": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "k8s_describe",
+    "description": "Show detailed information about a specific resource or group of resources.\n\n:param resource_type: The type of resource to describe (e.g., pods, deployments).\n:param name: The name of the resource to describe. If not specified, describes resources matching the selector.\n:param namespace: The namespace of the resource. If not specified, uses the default namespace.\n:param selector: Label selector to filter resources (e.g., \"app=nginx\").\n:param all_namespaces: Whether to describe resources in all namespaces.\n:return: The detailed description of the resource(s).",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        },
+        "selector": {
+          "type": "string",
+          "description": ""
+        },
+        "all_namespaces": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "resource_type"
+      ]
+    }
+  },
+  {
+    "name": "k8s_logs",
+    "description": "Print the logs for a container in a pod.\n\n:param pod_name: The name of the pod.\n:param container: The name of the container in the pod. If not specified, uses the first container.\n:param namespace: The namespace of the pod. If not specified, uses the default namespace.\n:param tail: The number of lines from the end of the logs to show. If not specified, shows all lines.\n:param previous: Whether to show the logs for the previous instance of the container.\n:param since: Only return logs newer than a relative duration like 5s, 2m, or 3h, or an absolute timestamp.\n:param timestamps: Whether to include timestamps on each line.\n:param follow: Whether to follow the logs (stream in real-time).\n:return: The logs of the container.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "pod_name": {
+          "type": "string",
+          "description": ""
+        },
+        "container": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        },
+        "tail": {
+          "type": "string",
+          "description": ""
+        },
+        "previous": {
+          "type": "string",
+          "description": ""
+        },
+        "since": {
+          "type": "string",
+          "description": ""
+        },
+        "timestamps": {
+          "type": "string",
+          "description": ""
+        },
+        "follow": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "pod_name"
+      ]
+    }
+  },
+  {
+    "name": "k8s_events",
+    "description": "List events in the cluster.\n\n:param namespace: The namespace to get events from. If not specified, uses the default namespace.\n:param all_namespaces: Whether to get events from all namespaces.\n:param field_selector: Field selector to filter events (e.g., \"involvedObject.kind=Pod\").\n:param resource_type: The type of resource to get events for (e.g., pods, deployments).\n:param resource_name: The name of the resource to get events for.\n:param sort_by: Field to sort by (e.g., \"lastTimestamp\").\n:param watch: Whether to watch for new events.\n:return: The events.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": ""
+        },
+        "all_namespaces": {
+          "type": "string",
+          "description": ""
+        },
+        "field_selector": {
+          "type": "string",
+          "description": ""
+        },
+        "resource_type": {
+          "type": "string",
+          "description": ""
+        },
+        "resource_name": {
+          "type": "string",
+          "description": ""
+        },
+        "sort_by": {
+          "type": "string",
+          "description": ""
+        },
+        "watch": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "k8s_create",
+    "description": "Create a Kubernetes resource from YAML/JSON content.\n\n:param yaml_content: The YAML or JSON content of the resource to create.\n:param namespace: The namespace to create the resource in. If not provided, uses the namespace in the YAML or the default namespace.\n:return: The JSON representation of the created resource.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "yaml_content": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "yaml_content"
+      ]
+    }
+  },
+  {
+    "name": "k8s_scale",
+    "description": "Scale a deployment, replicaset, statefulset, or replication controller.\n\n:param resource_type: The type of resource to scale (deployment, replicaset, statefulset, replicationcontroller).\n:param name: The name of the resource to scale.\n:param replicas: The number of replicas to scale to.\n:param namespace: The namespace of the resource. If not specified, uses the default namespace.\n:return: The result of the scaling operation.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "replicas": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "resource_type",
+        "name",
+        "replicas"
+      ]
+    }
+  },
+  {
+    "name": "k8s_apply",
+    "description": "Apply a configuration to a resource by file content or file path.\n\n:param yaml_content: The YAML content to apply.\n:param namespace: The namespace to apply the configuration to. If not specified, uses the default namespace.\n:return: The result of the apply operation.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "yaml_content": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "k8s_delete",
+    "description": "Delete Kubernetes resources by name, label selector, or field selector.\n\n:param resource_type: The type of resource to delete (e.g., pods, deployments).\n:param name: The name of the resource to delete. If not specified, deletes resources matching the selectors.\n:param namespace: The namespace of the resource. If not specified, uses the default namespace.\n:param label_selector: Label selector to filter resources (e.g., \"app=nginx\").\n:param field_selector: Field selector to filter resources (e.g., \"metadata.name=nginx\").\n:param all_namespaces: Whether to delete resources in all namespaces.\n:param cascade: Whether to cascade the deletion to dependent resources.\n:param grace_period: The grace period for the deletion in seconds.\n:return: The result of the deletion operation.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "namespace": {
+          "type": "string",
+          "description": ""
+        },
+        "label_selector": {
+          "type": "string",
+          "description": ""
+        },
+        "field_selector": {
+          "type": "string",
+          "description": ""
+        },
+        "all_namespaces": {
+          "type": "string",
+          "description": ""
+        },
+        "cascade": {
+          "type": "string",
+          "description": ""
+        },
+        "grace_period": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "resource_type"
+      ]
+    }
+  },
+  {
+    "name": "kubectl",
+    "description": "Run a kubectl command and return the output.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "command"
+      ]
+    }
+  },
+  {
+    "name": "helm",
+    "description": "Run a helm command and return the output.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "command"
+      ]
+    }
+  }
+]

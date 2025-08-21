@@ -1,0 +1,166 @@
+# mcp-k8s-deployment.yaml
+
+# --- 1. ServiceAccount ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-k8s-sa
+  namespace: lexiops-copilot
+
+---
+# --- 2. ClusterRole ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mcp-k8s-role
+rules:
+# Full access to core resources across all namespaces
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["*"]
+# Full access to apps resources
+- apiGroups: ["apps"]
+  resources: ["*"]
+  verbs: ["*"]
+# Full access to batch resources
+- apiGroups: ["batch"]
+  resources: ["*"]
+  verbs: ["*"]
+# Full access to extensions
+- apiGroups: ["extensions"]
+  resources: ["*"]
+  verbs: ["*"]
+# Access to networking resources
+- apiGroups: ["networking.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+# Access to storage resources
+- apiGroups: ["storage.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+# Access to RBAC resources
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+# Access to API groups discovery
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+# Access to custom resources
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+# Access to metrics
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "list"]
+# Access to helm if available
+- apiGroups: ["helm.sh"]
+  resources: ["*"]
+  verbs: ["*"]
+# Access to node operations
+- nonResourceURLs: ["/api", "/api/*", "/apis", "/apis/*", "/healthz", "/readyz", "/livez", "/metrics"]
+  verbs: ["get"]
+
+---
+# --- 3. ClusterRoleBinding ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mcp-k8s-binding
+subjects:
+- kind: ServiceAccount
+  name: mcp-k8s-sa
+  namespace: lexiops-copilot
+roleRef:
+  kind: ClusterRole
+  name: mcp-k8s-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# --- 4. ConfigMap chứa server-spec (HTTP server) ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-server-spec
+  namespace: lexiops-copilot
+data:
+  server-spec.yaml: |
+    type: http
+    app: mcp_kubernetes_server.main:mcp
+    host: 0.0.0.0
+    port: 8000
+
+---
+# --- 5. Deployment MCP server ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-k8s-deployment
+  namespace: lexiops-copilot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-k8s
+  template:
+    metadata:
+      labels:
+        app: mcp-k8s
+    spec:
+      serviceAccountName: mcp-k8s-sa
+      containers:
+      - name: mcp-k8s-container
+        image: ghcr.io/feiskyer/mcp-kubernetes-server:latest
+        command: ["mcp-kubernetes-server"]
+        args: ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000"]
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PORT
+          value: "8000"
+        - name: HOST
+          value: "0.0.0.0"
+        volumeMounts:
+        - name: server-spec
+          mountPath: /app/server-spec.yaml
+          subPath: server-spec.yaml
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        livenessProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+      volumes:
+      - name: server-spec
+        configMap:
+          name: mcp-server-spec
+
+---
+# --- 6. ClusterIP Service cho MCP server ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-k8s-service
+  namespace: lexiops-copilot
+spec:
+  selector:
+    app: mcp-k8s
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP

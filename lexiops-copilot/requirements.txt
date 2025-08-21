@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+langchain
+langchain_openai
+mcp[cli]
+langchain_mcp_adapters==0.1.9
+langgraph==0.5.4
+streamlit
+requests

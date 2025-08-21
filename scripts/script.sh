@@ -13,7 +13,7 @@ helm install loki grafana/loki-stack \
 kubectl apply -f helm/charts/dozzle/dozzle-k8s.yaml -n logging
 kubectl delete -f helm/charts/dozzle/dozzle-k8s.yaml -n logging
 kubectl port-forward svc/dozzle-service 8080:8080
-kubectl port-forward svc/loki-grafana 3000:80 -n logging
+kubectl port-forward svc/loki-grafana 3000:80 -n monitoring
 
 kubectl port-forward svc/legal-frontend 5173:80 -n application
 # Remove application

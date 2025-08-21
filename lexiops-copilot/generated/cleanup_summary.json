@@ -1,0 +1,35 @@
+{
+  "cleanup_date": "2025-08-20T16:54:30.564653",
+  "directories_created": [
+    "generated/",
+    "generated/mcp_tools/",
+    "generated/test_results/",
+    "backup/original_files/",
+    "docs/mcp_integration/"
+  ],
+  "files_moved": {
+    "mcp_tools": [
+      "mcp_tools_full.json",
+      "mcp_tools_extracted.json",
+      "mcp_tools_optimized.json",
+      "mcp_tools_prompt.txt",
+      "mcp_tools_optimized_prompt.txt"
+    ],
+    "test_results": [
+      "get_mcp_tools.py",
+      "optimize_tools.py",
+      "test_dynamic_tools.py",
+      "demo_mcp_optimization.py"
+    ]
+  },
+  "core_files_root": [
+    "quick_test.py",
+    "test_fastapi_mcp.py",
+    "test_mcp.py",
+    "requirements.txt"
+  ],
+  "updated_files": [
+    "agent/nodes/planner_node.py"
+  ],
+  "description": "Organized project structure for better maintainability"
+}
