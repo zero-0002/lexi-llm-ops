@@ -36,6 +36,10 @@
 
 <img src="./docs/lexiops.svg" alt="System Architecture"/>
 
+## **Copilot** Agentic workflow system designed to assist DevOps engineers (Operators) in managing and automating operations on Kubernetes clusters.
+<img src="./lexiops-copilot/docs/agentic.svg" alt="Lexiops copilot"/>
+
+
 ```
 ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
 │    Frontend React   │    │   FastAPI Backend   │    │   AI Processing     │
@@ -62,6 +66,8 @@
 │   - Link Processing │    │   - Analysis Cache  │    │                     │
 └─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 ```
+
+---
 
 ### 🌟 Key Features
 
