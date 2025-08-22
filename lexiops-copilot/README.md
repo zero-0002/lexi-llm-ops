@@ -14,7 +14,7 @@ The system is deployed **inside a single Kubernetes namespace** and acts as an *
 ## 🏗 Architecture & Flow
 
 ### 🔹 1. Request Handling
-- **Dev (Operator)** submits a request (task, prompt, or operation).  
+- **Dev (Operator)** submits a request (task, prompt, or operation) or Cron Job → Automatically triggers  
 - The request is received by the **Responder**.
 
 ### 🔹 2. Planning
@@ -61,18 +61,18 @@ The system is deployed **inside a single Kubernetes namespace** and acts as an *
 
 ## 📊 Example Workflow (Text Version)
 
-1. **Dev** submits a request.  
-2. **Responder** receives and forwards the request to **Planner**.  
-3. **Planner** creates an execution plan.  
-4. **Reviewer** checks the plan:  
+1. **Cron Job** or **Dev** provides an input/request.  
+1. **Responder** receives and forwards the request to **Planner**.  
+2. **Planner** creates an execution plan.  
+3. **Reviewer** checks the plan:  
    - If valid → send to **Router**.  
    - If invalid → return to **Planner**.  
    - If repeated errors → escalate to **Dev**.  
-5. **Router** chooses the correct **Tool**.  
-6. **Tool** executes the task and updates **DB-RAG**.  
-7. **Planner** may reuse results from **DB-RAG**.  
-8. **Responder** sends the final answer back to **Dev**.  
-9. **Agent Supervisor** monitors everything, detects patterns, and proposes improvements.  
+4. **Router** chooses the correct **Tool**.  
+5. **Tool** executes the task and updates **DB-RAG**.  
+6. **Planner** may reuse results from **DB-RAG**.  
+7. **Responder** sends the final answer back to **Dev**.  
+8. **Agent Supervisor** monitors everything, detects patterns, and proposes improvements.  
 
 ---
 
