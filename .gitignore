@@ -11,6 +11,7 @@ ENV/
 .env.secrets
 .env.local
 .cursor/
+.motia/
 
 ns.json
 
@@ -69,3 +70,6 @@ qdrant_storage/
 # Backup files
 *.bak
 *~
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat

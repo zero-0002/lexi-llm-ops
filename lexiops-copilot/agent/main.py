@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from agent.graph import get_graph
 from pydantic import BaseModel
-import asyncio
-import os
 from dotenv import load_dotenv
+
+# Import logging config FIRST để tắt debug logs
+from agent.utils.logging_config import suppress_debug_logs
+
 from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from agent.graph import AgentExecutor

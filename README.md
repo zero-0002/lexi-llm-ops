@@ -18,6 +18,9 @@
 #### 🤖 DevOps Copilot Architecture  
 <img src="./lexiops-copilot/docs/agentic.svg" alt="LexiOps DevOps Copilot" width="100%"/>
 
+#### 🌟 Application Architecture  
+<img src="./docs/application.svg" alt="Application" width="100%"/>
+
 </div>
 
 ---

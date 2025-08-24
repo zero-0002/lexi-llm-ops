@@ -1,0 +1,1040 @@
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2825,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": [
+                {
+                    "task_id": "1",
+                    "description": "Kiểm tra logs của dịch vụ A để xác định xem pod có bị crash hay không",
+                    "strategy": "Sử dụng lệnh xem logs của Kubernetes để kiểm tra trạng thái crash của pod dịch vụ A",
+                    "reason": "Phân tích logs để xác định nguyên nhân pod bị crash trước khi quyết định restart",
+                    "depend_on": [],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl logs service-a -n namespace-name --tail=100",
+                        "time_limit": 10
+                    }
+                },
+                {
+                    "task_id": "2",
+                    "description": "Xác định xem logs của dịch vụ A có chứa lỗi hay crash",
+                    "strategy": "Phân tích output logs từ task 1 để kiểm tra lỗi hoặc crash report",
+                    "reason": "Biết được nguyên nhân crash để quyết định có restart hay không",
+                    "depend_on": [
+                        "1"
+                    ]
+                },
+                {
+                    "task_id": "3",
+                    "description": "Restart dịch vụ A nếu pod đã crash",
+                    "strategy": "Điều kiện kiểm tra Log có lỗi/crash, sau đó dùng lệnh restart pod hoặc deployment",
+                    "reason": "Khắc phục sự cố dịch vụ A bằng cách restart pod để đảm bảo dịch vụ hoạt động bình thường",
+                    "depend_on": [
+                        "2"
+                    ],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl rollout restart deployment/service-a -n namespace-name",
+                        "time_limit": 10
+                    }
+                }
+            ]
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 3070,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": [
+                {
+                    "task_id": "task_1",
+                    "description": "Kiểm tra logs của service A để xác định trạng thái hiện tại của pod",
+                    "strategy": "Sử dụng công cụ tìm kiếm để tra cứu cách kiểm tra logs pod trong môi trường tương ứng",
+                    "reason": "Xác định xem pod của service A có gặp sự cố hay không",
+                    "depend_on": [],
+                    "tool": "functions.search_web",
+                    "params": {
+                        "query": "Cách kiểm tra logs pod service A trong Kubernetes",
+                        "region": "vn-vi",
+                        "max_results": 3
+                    }
+                },
+                {
+                    "task_id": "task_2",
+                    "description": "Phân tích logs để xác định xem pod của service A có crash hoặc gặp lỗi không",
+                    "strategy": "Phân tích kết quả từ task 1, xác định các lỗi hoặc crash trong logs",
+                    "reason": "Cần xác định đơn giản và chính xác trạng thái pod trước khi quyết định restart",
+                    "depend_on": [
+                        "task_1"
+                    ]
+                },
+                {
+                    "task_id": "task_3",
+                    "description": "Khởi động lại service A nếu pod đã crash",
+                    "strategy": "Sử dụng lệnh để restart pod hoặc service trong Kubernetes nếu logs cho thấy crash",
+                    "reason": "Để đảm bảo service hoạt động trở lại bình thường",
+                    "depend_on": [
+                        "task_2"
+                    ],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl get pods | grep service-A",
+                        "time_limit": 5
+                    }
+                },
+                {
+                    "task_id": "task_4",
+                    "description": "Restart pod của service A nếu phát hiện crash",
+                    "strategy": "Chạy lệnh để delete pod, Kubernetes sẽ tự động khởi động lại pod mới",
+                    "reason": "Restart pod để khắc phục crash và restore dịch vụ",
+                    "depend_on": [
+                        "task_3"
+                    ],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl delete pod -l app=service-A",
+                        "time_limit": 5
+                    }
+                }
+            ]
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1761,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": [
+                {
+                    "task_id": "1",
+                    "description": "Check logs for service A to identify if there are any crash events.",
+                    "strategy": "Use shell command to fetch logs of service A and look for crash indicators.",
+                    "reason": "To determine if service A has crashed based on logs."
+                },
+                {
+                    "task_id": "2",
+                    "description": "Restart service A if crash detected in logs.",
+                    "strategy": "Use shell command to restart service A.",
+                    "reason": "Ensure service A is running normally after crash detection.",
+                    "depend_on": [
+                        "1"
+                    ]
+                }
+            ]
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2282,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": [
+                {
+                    "task_id": "1",
+                    "description": "Check logs of service A to determine if the pod has crashed.",
+                    "strategy": "Use shell command to view the logs of service A and identify crash indicators.",
+                    "reason": "Logs provide necessary information about the pod's status and crash reasons.",
+                    "depend_on": [],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl logs service-a",
+                        "time_limit": 10
+                    }
+                },
+                {
+                    "task_id": "2",
+                    "description": "Restart service A if the logs indicate a pod crash.",
+                    "strategy": "Analyze logs from Task 1; if crash detected, execute command to restart service A.",
+                    "reason": "Restarting the service can resolve transient issues and restore service availability.",
+                    "depend_on": [
+                        "1"
+                    ],
+                    "tool": "functions.execute_shell_command",
+                    "params": {
+                        "command": "kubectl rollout restart deployment/service-a",
+                        "time_limit": 10
+                    }
+                }
+            ]
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2342,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "task_id": "1",
+                "description": "Check logs of service A to identify if the pod has crashed.",
+                "strategy": "Use system commands or tools to retrieve logs of service A and analyze for crash indications.",
+                "reason": "Understanding if the pod crashed is essential before deciding on restarting the service.",
+                "tool": "functions.execute_shell_command",
+                "params": {
+                    "command": "kubectl logs -l app=serviceA --tail=100",
+                    "time_limit": 10
+                },
+                "depend_on": []
+            }
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2243,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": [
+                {
+                    "tasks": [
+                        {
+                            "task_id": "1",
+                            "description": "Kiểm tra logs của dịch vụ A để xác định trạng thái hoạt động hoặc lỗi",
+                            "strategy": "Sử dụng lệnh kubectl để xem logs của pod liên quan đến dịch vụ A.",
+                            "tool": "functions.execute_shell_command",
+                            "params": {
+                                "command": "kubectl logs -lapp=serviceA --tail=100",
+                                "time_limit": 10
+                            },
+                            "reason": "Kiểm tra logs để phát hiện các lỗi hoặc trạng thái bất thường của dịch vụ A.",
+                            "depend_on": []
+                        }
+                    ],
+                    "response": "Đã tạo các task kiểm tra logs và khởi động lại dịch vụ A nếu phát hiện pod crash.",
+                    "visible_to_user": true
+                }
+            ]
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1791,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "messages": []
+            }
+        }
+    ]
+}
+{'messages': [
+        {'raw': AIMessage(content='', additional_kwargs={'tool_calls': [
+                    {'id': 'call_zJQw0esD6DZhb0Km35M8AVWl', 'function': {'arguments': '{
+                                "tasks": [
+                                    {
+                                        "task_id": "1",
+                                        "description": "Kiểm tra logs của dịch vụ A để xác định xem có lỗi hoặc crash không.",
+                                        "strategy": "Sử dụng lệnh kubectl logs hoặc công cụ tương tự để lấy logs của pod dịch vụ A.",
+                                        "tool": "functions.execute_shell_command",
+                                        "params": {
+                                            "command": "kubectl logs service-a --since=1h",
+                                            "time_limit": 10
+                                        },
+                                        "reason": "Cần xem logs của service A trong vòng 1 giờ để xác định trạng thái hoạt động và lỗi.",
+                                        "depend_on": []
+                                    }
+                                ],
+                                "response": "Đã lập kế hoạch kiểm tra logs của service A trong vòng 1 giờ qua để xác định tình trạng crash.",
+                                "visible_to_user": true
+                            }', 'name': 'PlannerOutput'
+                        }, 'type': 'function'
+                    }
+                ], 'refusal': None
+            }, response_metadata={'token_usage': {'completion_tokens': 141, 'prompt_tokens': 510, 'total_tokens': 651, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0
+                    }, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0
+                    }
+                }, 'model_name': 'gpt-4.1-nano-2025-04-14', 'system_fingerprint': 'fp_c4c155951e', 'id': 'chatcmpl-C7uB7YH2j7Z0UwzdUV0RDDxiocbtP', 'service_tier': 'default', 'finish_reason': 'stop', 'logprobs': None
+            }, id='run--4371f7c8-13aa-42ed-be39-573a3fa81d04-0', tool_calls=[
+                {'name': 'PlannerOutput', 'args': {'tasks': [
+                            {'task_id': '1', 'description': 'Kiểm tra logs của dịch vụ A để xác định xem có lỗi hoặc crash không.', 'strategy': 'Sử dụng lệnh kubectl logs hoặc công cụ tương tự để lấy logs của pod dịch vụ A.', 'tool': 'functions.execute_shell_command', 'params': {'command': 'kubectl logs service-a --since=1h', 'time_limit': 10
+                                }, 'reason': 'Cần xem logs của service A trong vòng 1 giờ để xác định trạng thái hoạt động và lỗi.', 'depend_on': []
+                            }
+                        ], 'response': 'Đã lập kế hoạch kiểm tra logs của service A trong vòng 1 giờ qua để xác định tình trạng crash.', 'visible_to_user': True
+                    }, 'id': 'call_zJQw0esD6DZhb0Km35M8AVWl', 'type': 'tool_call'
+                }
+            ], usage_metadata={'input_tokens': 510, 'output_tokens': 141, 'total_tokens': 651, 'input_token_details': {'audio': 0, 'cache_read': 0
+                }, 'output_token_details': {'audio': 0, 'reasoning': 0
+                }
+            }), 'parsed': PlannerOutput(tasks=[Task(task_id='1', description='Kiểm tra logs của dịch vụ A để xác định xem có lỗi hoặc crash không.', strategy='Sử dụng lệnh kubectl logs hoặc công cụ tương tự để lấy logs của pod dịch vụ A.', tool='functions.execute_shell_command', params={'command': 'kubectl logs service-a --since=1h', 'time_limit': 10
+                }, reason='Cần xem logs của service A trong vòng 1 giờ để xác định trạng thái hoạt động và lỗi.', depend_on=[])
+            ], response='Đã lập kế hoạch kiểm tra logs của service A trong vòng 1 giờ qua để xác định tình trạng crash.', visible_to_user=True), 'parsing_error': None
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1946,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Check logs of service A to identify issues or pod crash.",
+                        "strategy": "Use shell command to fetch recent logs of the pod running service A and analyze for crash indicators.",
+                        "tool": "functions.execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs $(kubectl get pods -l app=serviceA -o jsonpath='{.items[0].metadata.name}') --tail=50",
+                            "time_limit": 10
+                        },
+                        "reason": "To understand if there's an indication of pod crash from recent logs.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "Checking logs for service A and restarting if necessary.",
+                "visible_to_user": false
+            }
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2560,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "error": "'str' object has no attribute 'setdefault'"
+            }
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1950,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Kiểm tra logs của dịch vụ A để xác định pod crash",
+                        "strategy": "Sử dụng câu lệnh kubectl hoặc công cụ quản lý container để xem logs của dịch vụ A.",
+                        "tool": "functions.execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs -l app=serviceA --tail=100",
+                            "time_limit": 30
+                        },
+                        "reason": "Khởi đầu bằng việc xem logs của dịch vụ A để xác định tình trạng crash, lỗi cụ thể.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "Đang kiểm tra logs của dịch vụ A.",
+                "visible_to_user": false
+            }
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1530,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Check logs of service A to determine if the pod has crashed.",
+                        "strategy": "Use shell command to retrieve recent logs for service A.",
+                        "tool": "functions.execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs serviceA --tail=100",
+                            "time_limit": 10
+                        },
+                        "reason": "Gather log information to identify if there is a crash or error in service A.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "I will first check the logs of service A to see if there is any indication of a crash.",
+                "visible_to_user": false
+            }
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1832,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Kiểm tra logs của dịch vụ A trong hệ thống Kubernetes để xác định tình trạng pod của dịch vụ A.",
+                        "strategy": "Sử dụng lệnh kubectl để xem logs của pod dịch vụ A, tìm các lỗi hoặc crash.",
+                        "tool": "execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs $(kubectl get pods -l app=service-A -o jsonpath='{.items[0].metadata.name}')",
+                            "time_limit": 20
+                        },
+                        "reason": "Để xác định xem có lỗi nào gây ra crash của pod dịch vụ A.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "Đã lập kế hoạch kiểm tra logs và restart dịch vụ A nếu cần.",
+                "visible_to_user": false
+            }
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1299,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Kiểm tra logs của service A để xác định có lỗi hoặc pod crash không.",
+                        "strategy": "Sử dụng lệnh kiểm tra logs của Kubernetes cho service A.",
+                        "tool": "execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs serviceA",
+                            "time_limit": 10
+                        },
+                        "reason": "Cần kiểm tra logs để xác định vấn đề trước khi quyết định restart.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "Chưa thực hiện.",
+                "visible_to_user": false
+            }
+        }
+    ]
+}
+{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 1541,
+    "prompt": "Check logs service A và restart service A nếu pod crash.",
+    "planner_output": [
+        {
+            "planner": {
+                "tasks": [
+                    {
+                        "task_id": "1",
+                        "description": "Check logs of service A to identify any crash or errors.",
+                        "strategy": "Use shell commands to fetch recent logs of service A.",
+                        "tool": "functions.execute_shell_command",
+                        "params": {
+                            "command": "kubectl logs service-A --tail=100",
+                            "time_limit": 30
+                        },
+                        "reason": "To gather relevant logs for troubleshooting.",
+                        "depend_on": []
+                    }
+                ],
+                "response": "",
+                "visible_to_user": false
+            }
+        }
+    ]
+}{
+    "model": "gpt-4.1-nano",
+    "inference_time_ms": 2941,
+    "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+    "planner_output": [
+        {
+            "planner": {
+                "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip... ai'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+            }
+        }
+    ]
+}
+
+{'messages': [
+        {'raw': AIMessage(content='', additional_kwargs={'tool_calls': [
+                    {'id': 'call_Ek75nmqqjQ5jWSQoDWDq555r', 'function': {'arguments': '{
+                                "tasks": [
+                                    {
+                                        "task_id": "1",
+                                        "description": "Check logs of service A to identify any crash or errors.",
+                                        "strategy": "Use shell commands to fetch recent logs of service A.",
+                                        "tool": "functions.execute_shell_command",
+                                        "params": {
+                                            "command": "kubectl logs service-A --tail=100",
+                                            "time_limit": 30
+                                        },
+                                        "reason": "To gather relevant logs for troubleshooting.",
+                                        "depend_on": []
+                                    }
+                                ]
+                            }\n\n', 'name': 'PlannerOutput'
+                        }, 'type': 'function'
+                    }
+                ], 'refusal': None
+            }, response_metadata={'token_usage': {'completion_tokens': 77, 'prompt_tokens': 519, 'total_tokens': 596, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0
+                    }, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0
+                    }
+                }, 'model_name': 'gpt-4.1-nano-2025-04-14', 'system_fingerprint': 'fp_c4c155951e', 'id': 'chatcmpl-C7uiCIEjUhgaJzarOX4Zs8pEmacyW', 'service_tier': 'default', 'finish_reason': 'stop', 'logprobs': None
+            }, id='run--ed1fe950-db01-4884-b41d-22003e429576-0', tool_calls=[
+                {'name': 'PlannerOutput', 'args': {'tasks': [
+                            {'task_id': '1', 'description': 'Check logs of service A to identify any crash or errors.', 'strategy': 'Use shell commands to fetch recent logs of service A.', 'tool': 'functions.execute_shell_command', 'params': {'command': 'kubectl logs service-A --tail=100', 'time_limit': 30
+                                }, 'reason': 'To gather relevant logs for troubleshooting.', 'depend_on': []
+                            }
+                        ]
+                    }, 'id': 'call_Ek75nmqqjQ5jWSQoDWDq555r', 'type': 'tool_call'
+                }
+            ], usage_metadata={'input_tokens': 519, 'output_tokens': 77, 'total_tokens': 596, 'input_token_details': {'audio': 0, 'cache_read': 0
+                }, 'output_token_details': {'audio': 0, 'reasoning': 0
+                }
+            }), 'parsing_error': 2 validation errors for PlannerOutput
+response
+  Field required [type=missing, input_value={'tasks': [
+                        {'task_id': '1...ng.', 'depend_on': []
+                        }
+                    ]
+                }, input_type=dict
+            ]
+    For further information visit https: //errors.pydantic.dev/2.11/v/missing
+visible_to_user
+  Field required [type=missing, input_value={'tasks': [
+                        {'task_id': '1...ng.', 'depend_on': []
+                        }
+                    ]
+                }, input_type=dict
+            ]
+    For further information visit https: //errors.pydantic.dev/2.11/v/missing, 'parsed': None}]}{"model": "gpt-4.1-nano", "inference_time_ms": 1940, "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.", "planner_output": [{"planner": {"error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"}}]}{"model": "gpt-4.1-nano", "inference_time_ms": 2014, "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.", "planner_output": [{"planner": {"tasks": [{"task_id": "1", "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại, và thời điểm nhận chức của họ.", "strategy": "Sử dụng search_web để truy cập các trang web liên quan đến chính trị và chính phủ Việt Nam để lấy thông tin chính xác và cập nhật.", "tool": "search_web", "params": null, "reason": "Để có thông tin chính xác và mới nhất về các vị trí quan trọng trong chính phủ Việt Nam.", "depend_on": []}], "response": "Đang thực hiện tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại, và thời điểm nhận chức của họ.", "visible_to_user": false}}]}{"model": "gpt-4.1-nano", "inference_time_ms": 2035, "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.", "planner_output": [{"planner": {"error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...s': 3}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"}}]}
+            {
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2200,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1788,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại, và thời điểm nhận chức của họ.",
+                                    "strategy": "Sử dụng công cụ tìm kiếm web để lấy thông tin cập nhật mới nhất.",
+                                    "tool": "search_web",
+                                    "params": {
+                                        "query": "Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào."
+                                    },
+                                    "reason": "Để có thông tin chính xác và cập nhật nhất về các vị trí lãnh đạo cao nhất của Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": true
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 3082,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1531,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2251,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...́c'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2503,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...ại'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2574,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2496,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...nào'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1511,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cung cấp thông tin chính xác cho câu hỏi về Thủ tướng Việt Nam hiện tại",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": false
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1428,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "'AIMessage' object has no attribute 'get'"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2365,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần xác định ai là Thủ tướng Việt Nam hiện tại để cung cấp thông tin chính xác.",
+                                    "depend_on": []
+                                },
+                                {
+                                    "task_id": "2",
+                                    "description": "Tìm kiếm thông tin về Chủ tịch nước Việt Nam hiện tại",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần xác định ai là Chủ tịch nước Việt Nam hiện tại để cung cấp thông tin chính xác.",
+                                    "depend_on": []
+                                },
+                                {
+                                    "task_id": "3",
+                                    "description": "Tìm kiếm thông tin về thời điểm nhận chức của Thủ tướng Việt Nam hiện tại",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần biết thời điểm nhận chức của Thủ tướng để cung cấp đầy đủ thông tin.",
+                                    "depend_on": [
+                                        "1"
+                                    ]
+                                },
+                                {
+                                    "task_id": "4",
+                                    "description": "Tìm kiếm thông tin về thời điểm nhận chức của Chủ tịch nước Việt Nam hiện tại",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần biết thời điểm nhận chức của Chủ tịch nước để cung cấp đầy đủ thông tin.",
+                                    "depend_on": [
+                                        "2"
+                                    ]
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": false
+                        }
+                    }
+                ]
+            }{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1413,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại và thời điểm nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Để cung cấp câu trả lời chính xác về các vị trí lãnh đạo hiện tại của Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": null,
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2072,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Yêu cầu người dùng cung cấp thông tin chính xác về các quan chức cao nhất của Việt Nam hiện tại.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": null,
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1474,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, và ngày nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần cập nhật thông tin chính xác về các vị trí lãnh đạo cao nhất của Việt Nam mới nhất.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 23015,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại và thời điểm nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Để cung cấp thông tin chính xác về các vị trí lãnh đạo cao nhất của Việt Nam hiện tại.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1405,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Để cung cấp câu trả lời chính xác cho yêu cầu của người dùng",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": true
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1780,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần xác định rõ người đứng đầu chính phủ Việt Nam hiện tại.",
+                                    "depend_on": []
+                                },
+                                {
+                                    "task_id": "2",
+                                    "description": "Tìm kiếm thông tin về Chủ tịch nước Việt Nam hiện tại.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần xác định rõ người đứng đầu Nhà nước Việt Nam hiện tại.",
+                                    "depend_on": []
+                                },
+                                {
+                                    "task_id": "3",
+                                    "description": "Tìm kiếm thông tin về thời điểm nhận chức của Thủ tướng và Chủ tịch nước.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần biết chính xác thời điểm họ nhận chức để hoàn thiện thông tin.",
+                                    "depend_on": [
+                                        "1",
+                                        "2"
+                                    ]
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": false
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1419,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, họ nhận chức khi nào trên web.",
+                                    "tool": "search_web",
+                                    "params": {
+                                        "query": "Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                        "region": ""
+                                    },
+                                    "reason": "Cần thông tin cập nhật và chính xác từ internet về các vị trí lãnh đạo hiện tại của Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1735,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "error": "1 validation error for Task\nreason\n  Field required [type=missing, input_value={'task_id': '1', 'descrip...tnam'}, 'depend_on': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1436,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại và thời điểm nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần lấy thông tin cập nhật về các vị trí chính trị cao nhất tại Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": null,
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1302,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Yêu cầu cập nhật thông tin chính trị và lãnh đạo hiện tại của Việt Nam",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 2304,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại và ngày nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần cập nhật thông tin chính xác về các chức vụ này hiện tại.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": null,
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1259,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần lấy thông tin chính xác về người đảm nhiệm vị trí Thủ tướng Việt Nam hiện tại.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": false
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1681,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                    "tool": "search_web",
+                                    "params": {
+                                        "query": "Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào",
+                                        "region": ""
+                                    },
+                                    "reason": "Để có thông tin cập nhật và chính xác về các vị trí lãnh đạo hiện tại của Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }
+{
+                "model": "gpt-4.1-nano",
+                "inference_time_ms": 1451,
+                "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.",
+                "planner_output": [
+                    {
+                        "planner": {
+                            "tasks": [
+                                {
+                                    "task_id": "1",
+                                    "description": "Tìm kiếm thông tin về Thủ tướng Việt Nam hiện tại, Chủ tịch nước hiện tại, ngày nhận chức của họ.",
+                                    "tool": null,
+                                    "params": null,
+                                    "reason": "Cần lấy thông tin cập nhật về các vị trí lãnh đạo trong chính phủ Việt Nam.",
+                                    "depend_on": []
+                                }
+                            ],
+                            "response": "",
+                            "visible_to_user": null
+                        }
+                    }
+                ]
+            }{"model": "gpt-4.1-nano", "inference_time_ms": 1278, "prompt": "Tìm kiếm thông tin về 'Thủ tướng Việt Nam hiện tại là ai, Chủ tịch nước hiện tại là ai, nhận chức khi nào'.", "planner_output": [{"planner": {"error": "cannot access local variable 'raw_args' where it is not associated with a value"}}]}

@@ -1,21 +1,15 @@
-from typing import List, Dict, Any, TypedDict, Optional
+from typing import TypedDict, Annotated, List, Optional, Dict, Any
+import operator
 from langchain_core.messages import BaseMessage
+from .schemas import MultiStepPlan
 
 class AgentState(TypedDict):
-    # Input từ người dùng
-    input: str
-    
-    # Lịch sử messages để tracking workflow
-    messages: List[BaseMessage]
-    
-    # Plan được tạo ra từ planner
-    plan: Optional[Dict[str, Any]]
-    
-    # Tools results
-    tool_results: List[Dict[str, Any]]
-    
-    # Response cuối cùng
-    final_response: str
-    
-    # Trạng thái hiện tại của workflow
-    current_step: str
+    messages: Annotated[List[BaseMessage], operator.add]
+    planner_output: Optional[Dict[str, Any]] 
+    is_approved: bool # approve plan
+    is_valid: bool # validate output
+    plan: Optional[MultiStepPlan]
+    step_index: int
+    step_outputs: Annotated[List, operator.add]
+    scratchpad: List[BaseMessage]
+    review_outcome: str
